@@ -1,21 +1,18 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react-jsx",
     "jsxImportSource": "stick",
-    "jsxFactory": "s",
     "lib": [
       "ESNext",
       "DOM",
       "DOM.Iterable"
     ],
-    "strict": true,
-    "outFile": "./dist/bundle.js"
+    "strict": true
   },
   "include": [
-    "./src/**/*.ts",
-  ],
-  "compileOnSave": true
+    "./src/**/*.tsx",
+    "./src/**/*.ts"
+  ]
 }
