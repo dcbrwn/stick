@@ -1,5 +1,5 @@
 import { stick } from 'stick'
-import { observable } from 'stick/o'
+import { fromEvent, observable } from 'stick/o'
 
 function createTimer () {
   let counter = 0
@@ -11,23 +11,37 @@ function createTimer () {
   })
 }
 
-const TestElement = stick('x-test', (props: { header: string, content?: string }) => {
-  const timer = createTimer()
+const TestElement = stick('x-update-perf', (props: { cols: number, rows: number }) => {
+  // const timer = createTimer()
+  const mouseMove = fromEvent<MouseEvent>(document, 'mousemove')
 
-  return <div>
-    <h2>~~ {props.header} ~~</h2>
-    <p>{props.content} </p>
-    <p>Counter: {timer}</p>
-  </div>
-}, {
-  reflect: {
-    header: true
+  const body = []
+  for (let i = 0; i < props.rows; i += 1) {
+    for (let j = 0; j < props.cols; j += 1) {
+      const value = mouseMove.map((event) => {
+        return `(${event.pageX * i}, ${event.pageY * j})`
+      })
+      // const value = timer.map((time) => time * i * j)
+      const style = `
+        position: absolute;
+        contain: strict;
+        top: ${i * 30}px;
+        left: ${j * 100}px;
+        width: 100px;
+        height: 30px;
+        overflow: hidden;
+        white-space: nowrap;
+      `
+      body.push(<div style={style}>{value}</div>)
+    }
   }
+
+  return <div style="position: relative; font-family: monospace">{body}</div>
 })
 
 stick('x-app', (props: { header: string, content?: string }) => {
   return <div>
     <h1>Test</h1>
-    <TestElement header="It works" content='some contents' />
+    <TestElement cols={10} rows={100} />
   </div>
 })

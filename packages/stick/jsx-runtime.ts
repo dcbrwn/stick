@@ -16,12 +16,20 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
   const { children, ref, ...properties } = props
   const inits: (() => () => void)[] = []
 
-  Object.assign(element, properties)
+  if (typeof tag === 'string') {
+    for (const key in properties) {
+      if (!key.startsWith('_')) {
+        element.setAttribute(key, properties[key])
+      }
+    }
+  } else {
+    Object.assign(element, properties)
+  }
 
   if (children) {
     const c = Array.isArray(children) ? children : [children]
 
-    for (const child of c) {
+    for (const child of c.flat()) {
       let childElement: Node | null = null
 
       if (typeof child === 'string') {

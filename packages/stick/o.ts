@@ -12,6 +12,12 @@ export class O<T> {
     this.subscribe = subscribe
     this.next = next
   }
+
+  public map<R> (fn: (value: T) => R): O<R> {
+    return observable<R>((next) => {
+      return this.subscribe((value) => next(fn(value)))
+    })
+  }
 }
 
 export function observable<T> (producer?: Producer<T>): O<T> {
