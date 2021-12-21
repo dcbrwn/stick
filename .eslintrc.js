@@ -16,7 +16,9 @@ module.exports = {
   ],
   globals: {
     DocumentOrShadowRoot: false,
-    HTMLElementTagNameMap: false
+    HTMLElementTagNameMap: false,
+    EventListenerOptions: false,
+    VoidFunction: false
   },
   rules: {
   }

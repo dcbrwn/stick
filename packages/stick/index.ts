@@ -1,29 +1,50 @@
-import { stickKey, StickBuilder, StickOptions } from './definitions'
+import { stickKey, StickBuilder as StickMeta, StickOptions } from './definitions'
 
 export function stick<T extends Function> (
+  tagName: string,
   template: T,
   options: StickOptions = {}
-): T & { [stickKey]: StickBuilder } {
-  const startName = options.tagName || 'x-stick'
-  let tagName = startName
-  const counter = 0
-  while (customElements.get(tagName)) {
-    tagName = `${startName}-${counter}`
-  }
-  const element = template as (T & { [stickKey]: StickBuilder })
+): T & { [stickKey]: StickMeta } {
+  const element = template as (T & { [stickKey]: StickMeta })
 
   const elClass = class extends HTMLElement {
-    public connectedCallback () {
+    protected init: (() => () => void) | undefined
+
+    protected deinit: (() => void) | undefined
+
+    protected reflectProps (): void {
       if (options.reflect) {
         for (const key of Object.keys(options.reflect)) {
-          // @ts-ignore
-          this[key] = this.getAttribute(key)
+          if (this.hasAttribute(key)) {
+            // @ts-ignore
+            this[key] = this.getAttribute(key)
+          }
         }
       }
-      const renderer = template(this)
-      const fragment = document.createDocumentFragment()
-      renderer(fragment)
-      this.appendChild(fragment)
+    }
+
+    protected renderContent (): void {
+      if (this.init) {
+        return
+      }
+
+      const result = template(this)
+
+      this.appendChild(result.rootElement)
+      this.init = result.init
+    }
+
+    public connectedCallback () {
+      this.reflectProps()
+      this.renderContent()
+      this.deinit = this.init!()
+    }
+
+    public disconnectedCallback () {
+      if (this.deinit) {
+        this.deinit()
+        this.deinit = undefined
+      }
     }
   }
 
