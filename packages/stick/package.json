@@ -1,22 +1,20 @@
 {
-  "name": "stick-root",
-  "version": "1.0.0",
-  "description": "",
+  "name": "stick",
+  "version": "0.0.1",
+  "main": "./index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dcbrwn/stick.git"
   },
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/dcbrwn/stick/issues"
   },
   "homepage": "https://github.com/dcbrwn/stick#readme",
-  "workspaces": [
-    "packages/stick",
-    "packages/stick-demo"
-  ]
+  "description": ""
 }

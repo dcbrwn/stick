@@ -10,9 +10,5 @@
       "DOM.Iterable"
     ],
     "strict": true
-  },
-  "include": [
-    "./src/**/*.tsx",
-    "./src/**/*.ts"
-  ]
+  }
 }
