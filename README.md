@@ -1,6 +1,5 @@
 # TODO
 
-- Observable attributes
 - Event management
 - Conditional rendering
 - Observable collection rendering

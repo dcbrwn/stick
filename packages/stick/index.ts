@@ -1,6 +1,6 @@
 import { stickKey, StickBuilder as StickMeta, StickOptions } from './definitions'
 
-export function stick<T extends Function> (
+export function element<T extends Function> (
   tagName: string,
   template: T,
   options: StickOptions = {}
@@ -11,17 +11,6 @@ export function stick<T extends Function> (
     protected init: (() => () => void) | undefined
 
     protected deinit: (() => void) | undefined
-
-    protected reflectProps (): void {
-      if (options.reflect) {
-        for (const key of Object.keys(options.reflect)) {
-          if (this.hasAttribute(key)) {
-            // @ts-ignore
-            this[key] = this.getAttribute(key)
-          }
-        }
-      }
-    }
 
     protected renderContent (): void {
       if (this.init) {
@@ -35,7 +24,6 @@ export function stick<T extends Function> (
     }
 
     public connectedCallback () {
-      this.reflectProps()
       this.renderContent()
       this.deinit = this.init!()
     }
@@ -50,7 +38,10 @@ export function stick<T extends Function> (
 
   customElements.define(tagName, elClass)
 
-  element[stickKey] = { tagName }
+  element[stickKey] = {
+    tagName,
+    reflect: options.reflect || {}
+  }
 
   return element
 }

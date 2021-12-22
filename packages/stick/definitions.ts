@@ -2,11 +2,12 @@ export const stickKey = Symbol('Stick')
 
 export type StickOptions = {
     tagName?: string
-    reflect?: Record<string, unknown>
+    reflect?: Record<string, boolean>
 }
 
 export interface StickBuilder {
     tagName: string;
+    reflect: Record<string, boolean>
 }
 
 export type StickElement = Function & { [stickKey]: StickBuilder }

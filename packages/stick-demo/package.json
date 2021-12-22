@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "watch": "parcel ./index.html",
+    "watch": "parcel serve --no-cache ./index.html",
     "test": "exit 1"
   },
   "author": "",
