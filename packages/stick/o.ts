@@ -18,14 +18,16 @@ export class O<T> {
       let nextFrame: number | undefined
       let nextValue: T | undefined
 
+      const handleNextFrame = () => {
+        next(nextValue!)
+        nextFrame = undefined
+      }
+
       return this.subscribe((value) => {
-        if (nextFrame === undefined) {
-          nextFrame = requestAnimationFrame(() => {
-            next(nextValue!)
-            nextFrame = undefined
-          })
-        }
         nextValue = value
+        if (nextFrame === undefined) {
+          nextFrame = requestAnimationFrame(handleNextFrame)
+        }
       })
     })
   }
@@ -63,9 +65,7 @@ export function observable<T> (producer?: Producer<T>): O<T> {
   }
 
   function next (value: T): void {
-    for (const observer of observers) {
-      observer(value)
-    }
+    observers.forEach((observer) => observer(value))
   }
 
   return new O<T>(subscribe, next)

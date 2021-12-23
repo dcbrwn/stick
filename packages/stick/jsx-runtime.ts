@@ -1,13 +1,13 @@
 import { Renderable, Renderer, stickKey, RenderResult } from './definitions'
 import { O } from './o'
 
+type Displayed = string | {
+  toString(): string;
+}
+
+type AttrValue<T> = T | O<T>
+
 export namespace JSX {
-  type Displayed = string | {
-    toString(): string;
-  }
-
-  type AttrValue<T> = T | O<T>
-
   interface ElementProps {
     children?: (string | O<any> | Renderer)[]
   }
@@ -24,6 +24,10 @@ export namespace JSX {
   }
 }
 
+function toString (value: Displayed): string {
+  return typeof value === 'string' ? value : value.toString()
+}
+
 export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
   const tagName = typeof tag === 'string' ? tag : tag[stickKey].tagName
 
@@ -31,11 +35,11 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
   const { children, ref, ...properties } = props
   const attachFns: (() => () => void)[] = []
 
-  const setValue = (key: string, newValue: unknown) => {
+  const setValue = (key: string, newValue: Displayed) => {
     if (typeof newValue === 'boolean') {
       element.toggleAttribute(key, newValue)
     } else {
-      element.setAttribute(key, String(newValue))
+      element.setAttribute(key, toString(newValue))
     }
   }
 
@@ -73,7 +77,7 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
       } else if (child instanceof O) {
         const textNode = document.createTextNode('')
         attachFns.push(() => child.subscribe((value) => {
-          textNode.data = String(value)
+          textNode.data = value
         }))
         childElement = textNode
       } else {
