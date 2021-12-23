@@ -29,7 +29,7 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
 
   const element = document.createElement(tagName)
   const { children, ref, ...properties } = props
-  const inits: (() => () => void)[] = []
+  const attachFns: (() => () => void)[] = []
 
   const setValue = (key: string, newValue: unknown) => {
     if (typeof newValue === 'boolean') {
@@ -47,7 +47,7 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
 
     if (needsReflect) {
       if (value instanceof O) {
-        inits.push(() => value.subscribe((nextValue) => setValue(key, nextValue)))
+        attachFns.push(() => value.subscribe((nextValue) => setValue(key, nextValue)))
       } else {
         setValue(key, value)
       }
@@ -69,10 +69,10 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
 
       if (child instanceof RenderResult) {
         childElement = child.rootElement
-        if (child.init) inits.push(child.init)
+        if (child.attach) attachFns.push(child.attach)
       } else if (child instanceof O) {
         const textNode = document.createTextNode('')
-        inits.push(() => child.subscribe((value) => {
+        attachFns.push(() => child.subscribe((value) => {
           textNode.data = String(value)
         }))
         childElement = textNode
@@ -87,11 +87,11 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
   }
 
   return new RenderResult(element, () => {
-    const deinits = inits.map((init) => init())
+    const detachFns = attachFns.map((init) => init())
 
     return () => {
-      for (const deinit of deinits) {
-        deinit()
+      for (const detach of detachFns) {
+        detach()
       }
     }
   })

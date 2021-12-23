@@ -16,14 +16,14 @@ export type Renderable = (keyof HTMLElementTagNameMap) | StickElement;
 
 export class RenderResult {
   public readonly rootElement: Node | null
-  public readonly init: (() => () => void) | null
+  public readonly attach: (() => () => void) | null
 
   constructor (
     rootElement: Node | null,
     init: (() => () => void) | null
   ) {
     this.rootElement = rootElement
-    this.init = init
+    this.attach = init
   }
 }
 
