@@ -71,11 +71,11 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
         childElement = child.rootElement
         if (child.init) inits.push(child.init)
       } else if (child instanceof O) {
-        const span = document.createElement('s-bind')
+        const textNode = document.createTextNode('')
         inits.push(() => child.subscribe((value) => {
-          span.innerText = value
+          textNode.data = String(value)
         }))
-        childElement = span
+        childElement = textNode
       } else {
         childElement = document.createTextNode(String(child))
       }
@@ -96,12 +96,5 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
     }
   })
 }
-
-function defineBuiltins () {
-  class DummyElement extends HTMLElement {}
-  customElements.define('s-bind', DummyElement)
-}
-
-defineBuiltins()
 
 export const jsxs = jsx

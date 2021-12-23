@@ -7,7 +7,7 @@ const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) =
 
 const TestElement = element('x-update-perf', (props: { cols: number, rows: number }) => {
   // const timer = createTimer()
-  const mouseMove = fromEvent<MouseEvent>(document, 'mousemove')
+  const mouseMove = fromEvent<MouseEvent>(document, 'mousemove').throttle()
 
   const body = []
   for (let i = 0; i < props.rows; i += 1) {

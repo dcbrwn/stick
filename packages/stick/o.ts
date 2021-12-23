@@ -13,6 +13,23 @@ export class O<T> {
     this.next = next
   }
 
+  public throttle (): O<T> {
+    return observable((next) => {
+      let nextFrame: number | undefined
+      let nextValue: T | undefined
+
+      return this.subscribe((value) => {
+        if (nextFrame === undefined) {
+          nextFrame = requestAnimationFrame(() => {
+            next(nextValue!)
+            nextFrame = undefined
+          })
+        }
+        nextValue = value
+      })
+    })
+  }
+
   public map<R> (fn: (value: T) => R): O<R> {
     return observable<R>((next) => {
       return this.subscribe((value) => next(fn(value)))
