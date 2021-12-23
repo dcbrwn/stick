@@ -5,6 +5,10 @@ export const createElement = (tagName: string) => document.createElement(tagName
 
 export const createTextNode = (text: string) => document.createTextNode(text)
 
+export const createComment = (comment: string = '') => document.createComment(comment)
+
+export const createFragment = () => document.createDocumentFragment()
+
 export const on = (target: EventTarget, eventType: string, handler: (e: Event) => boolean | undefined | void, options?: EventListenerOptions) => {
   target.addEventListener(eventType, handler, options)
   return () => target.removeEventListener(eventType, handler, options)

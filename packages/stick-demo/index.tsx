@@ -46,11 +46,11 @@ element('x-app', () => {
     return map(events, () => console.log('Handled with observables'))
   })
 
-  return <div>
+  return <>
     <h1>Testbed</h1>
     <p>
       Event handlers: <button onClick={fnHandler}>Callback</button> <button onClick={thunkHandler}>Observer</button>
     </p>
     <TestElement cols={10} rows={100} />
-  </div>
+  </>
 })

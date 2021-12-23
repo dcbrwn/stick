@@ -1,5 +1,5 @@
-import { Renderable, Renderer, stickKey, isRenderResult, renderResult, AnyProps, Displayed } from './definitions'
-import { createElement, on, setAttr, createTextNode } from './dom'
+import { Renderable, Renderer, stickKey, isRenderResult, renderResult, AnyProps, Displayed, Fragment, StickBuilder } from './definitions'
+import { createElement, on, setAttr, createTextNode, createFragment } from './dom'
 import { fromEvent, isObservable, isThunk, O, Thunk } from './o'
 import { camelToKebab, toString } from './util'
 
@@ -28,54 +28,63 @@ export namespace JSX {
 
 const eventHandlerKey = /^on[A-Z]/
 
-export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
-  const isBuiltin = typeof tag === 'string'
-  const tagName = isBuiltin ? tag : tag[stickKey].tagName
+const bindEventHandler = (element: Element, key: string, handler: EventHandler<Event>) => {
+  const eventType = camelToKebab(key.slice(2))
 
-  const element = createElement(tagName)
+  if (isThunk(handler)) {
+    return () => handler(fromEvent(element, eventType))(/* subscribe for side effects */)
+  } else {
+    const eventHandler = handler as (event: Event) => boolean
+    return () => on(element, eventType, eventHandler)
+  }
+}
+
+const bindProp = (
+  element: Element,
+  key: string,
+  value: unknown,
+  meta?: StickBuilder
+) => {
+  const needsReflect = !meta || key in meta.reflect
+  let attach
+
+  if (needsReflect) {
+    if (isObservable(value)) {
+      attach = () => value((nextValue) => setAttr(element, key, nextValue as Displayed))
+    } else {
+      setAttr(element, key, value as Displayed)
+    }
+  }
+
+  if (meta) {
+    // @ts-expect-error
+    if (!element.props) element.props = {}
+    // @ts-expect-error
+    // We don't know what element we actually dealing with here
+    // All the typechecking will happen in the template
+    element.props[key] = value
+  }
+
+  return attach
+}
+
+const createRoot = (tag: Renderable): DocumentFragment | HTMLElement => {
+  if (tag === Fragment) return createFragment()
+  return createElement(typeof tag === 'string' ? tag : tag[stickKey].tagName)
+}
+
+export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
+  const element = createRoot(tag)
   const { children, ...properties } = props
   const attachFns: (() => () => void)[] = []
 
-  const setProp = (key: string, value: unknown) => {
-    const needsReflect = isBuiltin || key in tag[stickKey].reflect
-
-    if (needsReflect) {
-      if (isObservable(value)) {
-        attachFns.push(() => value((nextValue) => setAttr(element, key, nextValue as Displayed)))
-      } else {
-        setAttr(element, key, value as Displayed)
-      }
-    }
-
-    if (!isBuiltin) {
-      // @ts-expect-error
-      // We don't know what element we actually dealing with here
-      // All the typechecking will happen in the template
-      element.props[key] = value
-    }
-  }
-
-  const setEvent = (key: string, handler: EventHandler<Event>) => {
-    const eventType = camelToKebab(key.slice(2))
-
-    if (isThunk(handler)) {
-      attachFns.push(() => handler(fromEvent(element, eventType))(/* subscribe for side effects */))
-    } else {
-      const eventHandler = handler as (event: Event) => boolean
-
-      attachFns.push(() => on(element, eventType, eventHandler))
-    }
-  }
-
-  if (!isBuiltin) {
-    // @ts-expect-error
-    element.props = {}
-  }
-
   for (const [key, value] of Object.entries(properties)) {
     if (key.startsWith('_')) continue
-    else if (eventHandlerKey.test(key)) setEvent(key, value)
-    else setProp(key, value)
+    else if (eventHandlerKey.test(key)) {
+      attachFns.push(bindEventHandler(element as HTMLElement, key, value))
+    } else {
+      bindProp(element as HTMLElement, key, value, Reflect.get(element, stickKey))
+    }
   }
 
   if (children) {
@@ -112,3 +121,5 @@ export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
 }
 
 export const jsxs = jsx
+
+export { Fragment }

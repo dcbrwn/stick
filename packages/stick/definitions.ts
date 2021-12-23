@@ -29,6 +29,8 @@ export type Template<Props extends AnyProps> = (props: Props) => RenderResult
 
 export type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickBuilder }
 
-export type Renderable = (keyof HTMLElementTagNameMap) | StickElement<AnyProps>
+export const Fragment = Symbol('Fragment')
+
+export type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickElement<AnyProps>
 
 export type Renderer = (tag: Renderable, props: AnyProps) => RenderResult

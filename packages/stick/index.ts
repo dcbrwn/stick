@@ -1,4 +1,4 @@
-import { stickKey, StickBuilder as StickMeta, StickOptions, RenderResult, Template, StickElement, AnyProps } from './definitions'
+import { stickKey, StickOptions, Template, StickElement, AnyProps } from './definitions'
 import { appendChild } from './dom'
 
 export function element<Props extends AnyProps> (
@@ -6,9 +6,13 @@ export function element<Props extends AnyProps> (
   template: Template<Props>,
   options: StickOptions = {}
 ): StickElement<Props> {
-  const element = template as ((props: Props) => RenderResult) & { [stickKey]: StickMeta }
+  const meta = {
+    tagName,
+    reflect: options.reflect || {}
+  }
 
-  const elClass = class extends HTMLElement {
+  customElements.define(tagName, class extends HTMLElement {
+    public [stickKey] = meta
     public props!: Props
     public attach: (() => () => void) | boolean = false
     public detach: (() => void) | undefined
@@ -29,14 +33,7 @@ export function element<Props extends AnyProps> (
         this.detach = undefined
       }
     }
-  }
+  })
 
-  customElements.define(tagName, elClass)
-
-  element[stickKey] = {
-    tagName,
-    reflect: options.reflect || {}
-  }
-
-  return element
+  return Object.assign(template, { [stickKey]: meta })
 }
