@@ -1,50 +1,25 @@
+import { on } from './dom'
+import { createTag } from './util'
+
 type Observer<T> = (value: T) => void
 type Producer<T> = (next: Observer<T>) => (() => void) | void
 
-export class O<T> {
-  public readonly subscribe: (observer: Observer<T>) => (() => void)
-  public readonly next: (value: T) => void
+export type O<T> = (observer?: Observer<T>) => (() => void)
 
-  constructor (
-    subscribe: (observer: Observer<T>) => (() => void),
-    next: (value: T) => void
-  ) {
-    this.subscribe = subscribe
-    this.next = next
-  }
+const [tagObservable, isObservable] = createTag<O<unknown>>()
 
-  public throttle (): O<T> {
-    return observable((next) => {
-      let nextFrame: number | undefined
-      let nextValue: T | undefined
+export { isObservable }
 
-      const handleNextFrame = () => {
-        next(nextValue!)
-        nextFrame = undefined
-      }
-
-      return this.subscribe((value) => {
-        nextValue = value
-        if (nextFrame === undefined) {
-          nextFrame = requestAnimationFrame(handleNextFrame)
-        }
-      })
-    })
-  }
-
-  public map<R> (fn: (value: T) => R): O<R> {
-    return observable<R>((next) => {
-      return this.subscribe((value) => next(fn(value)))
-    })
-  }
-}
-
-export function observable<T> (producer?: Producer<T>): O<T> {
+export function observable<T> (producer: Producer<T>): O<T> {
   const observers = new Set<Observer<T>>()
   let detach: (() => void) | true | undefined
 
-  function subscribe (observer: Observer<T>): (() => void) {
-    if (!detach && producer) {
+  function next (value: T): void {
+    observers.forEach((observer) => observer(value))
+  }
+
+  function subscribe (observer: Observer<T> = () => {}): (() => void) {
+    if (!detach) {
       detach = producer(next) || true
     }
 
@@ -64,12 +39,12 @@ export function observable<T> (producer?: Producer<T>): O<T> {
     }
   }
 
-  function next (value: T): void {
-    observers.forEach((observer) => observer(value))
-  }
-
-  return new O<T>(subscribe, next)
+  return tagObservable(subscribe)
 }
+
+export type Thunk<In, Out> = (input: O<In>) => O<Out>
+
+export const [thunk, isThunk] = createTag<(input: O<unknown>) => O<unknown>>()
 
 export function fromEvent<E extends Event> (
   target: EventTarget,
@@ -78,10 +53,32 @@ export function fromEvent<E extends Event> (
 ): O<E> {
   return observable<E>((next) => {
     const listener = next as Observer<Event>
-    target.addEventListener(eventType, listener, options)
 
-    return () => {
-      target.removeEventListener(eventType, listener)
+    return on(target, eventType, listener, options)
+  })
+}
+
+export function throttle<T> (input: O<T>): O<T> {
+  return observable((next) => {
+    let nextFrame: number | undefined
+    let nextValue: T | undefined
+
+    const handleNextFrame = () => {
+      next(nextValue!)
+      nextFrame = undefined
     }
+
+    return input((value) => {
+      nextValue = value
+      if (nextFrame === undefined) {
+        nextFrame = requestAnimationFrame(handleNextFrame)
+      }
+    })
+  })
+}
+
+export function map<T, R> (input: O<T>, fn: (value: T) => R): O<R> {
+  return observable<R>((next) => {
+    return input((value) => next(fn(value)))
   })
 }

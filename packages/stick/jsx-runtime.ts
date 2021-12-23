@@ -1,9 +1,7 @@
-import { Renderable, Renderer, stickKey, RenderResult } from './definitions'
-import { O } from './o'
-
-type Displayed = string | {
-  toString(): string;
-}
+import { Renderable, Renderer, stickKey, isRenderResult, renderResult, AnyProps, Displayed } from './definitions'
+import { createElement, on, setAttr, createTextNode } from './dom'
+import { fromEvent, isObservable, isThunk, O, Thunk } from './o'
+import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
 
@@ -24,36 +22,24 @@ export namespace JSX {
   }
 }
 
-function toString (value: Displayed): string {
-  return typeof value === 'string' ? value : value.toString()
-}
+const eventHandlerKey = /^on[A-Z]/
 
-export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
-  const tagName = typeof tag === 'string' ? tag : tag[stickKey].tagName
+export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
+  const isBuiltin = typeof tag === 'string'
+  const tagName = isBuiltin ? tag : tag[stickKey].tagName
 
-  const element = document.createElement(tagName)
-  const { children, ref, ...properties } = props
+  const element = createElement(tagName)
+  const { children, ...properties } = props
   const attachFns: (() => () => void)[] = []
 
-  const setValue = (key: string, newValue: Displayed) => {
-    if (typeof newValue === 'boolean') {
-      element.toggleAttribute(key, newValue)
-    } else {
-      element.setAttribute(key, toString(newValue))
-    }
-  }
-
-  for (const [key, value] of Object.entries(properties)) {
-    if (key.startsWith('_')) continue
-
-    const isBuiltin = typeof tag === 'string'
+  const setProp = (key: string, value: unknown) => {
     const needsReflect = isBuiltin || key in tag[stickKey].reflect
 
     if (needsReflect) {
-      if (value instanceof O) {
-        attachFns.push(() => value.subscribe((nextValue) => setValue(key, nextValue)))
+      if (isObservable(value)) {
+        attachFns.push(() => value((nextValue) => setAttr(element, key, nextValue as Displayed)))
       } else {
-        setValue(key, value)
+        setAttr(element, key, value as Displayed)
       }
     }
 
@@ -61,27 +47,51 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
       // @ts-expect-error
       // We don't know what element we actually dealing with here
       // All the typechecking will happen in the template
-      element[key] = value
+      element.props[key] = value
     }
   }
 
-  if (children) {
-    const c = Array.isArray(children) ? children : [children]
+  const setEvent = (key: string, handler: ((event: Event) => boolean) | Thunk<Event, unknown>) => {
+    const eventType = camelToKebab(key.slice(2))
 
-    for (const child of c.flat()) {
+    if (isThunk(handler)) {
+      attachFns.push(() => handler(fromEvent(element, eventType))(/* subscribe for side effects */))
+    } else {
+      const eventHandler = handler as (event: Event) => boolean
+
+      attachFns.push(() => on(element, eventType, eventHandler))
+    }
+  }
+
+  if (!isBuiltin) {
+    // @ts-expect-error
+    element.props = {}
+  }
+
+  for (const [key, value] of Object.entries(properties)) {
+    if (key.startsWith('_')) continue
+    else if (eventHandlerKey.test(key)) setEvent(key, value)
+    else setProp(key, value)
+  }
+
+  if (children) {
+    const c = Array.isArray(children) && !isRenderResult(children) ? children : [children]
+
+    for (const child of c) {
       let childElement: Node | null = null
 
-      if (child instanceof RenderResult) {
-        childElement = child.rootElement
-        if (child.attach) attachFns.push(child.attach)
-      } else if (child instanceof O) {
-        const textNode = document.createTextNode('')
-        attachFns.push(() => child.subscribe((value) => {
-          textNode.data = value
+      if (isRenderResult(child)) {
+        const [rootElement, attach] = child
+        childElement = rootElement
+        if (attach) attachFns.push(attach)
+      } else if (isObservable(child)) {
+        const textNode = createTextNode('')
+        attachFns.push(() => child((value) => {
+          textNode.data = toString(value as Displayed)
         }))
         childElement = textNode
       } else {
-        childElement = document.createTextNode(String(child))
+        childElement = createTextNode(toString(child))
       }
 
       if (childElement) {
@@ -90,14 +100,10 @@ export const jsx: Renderer = (tag: Renderable, props: Record<string, any>) => {
     }
   }
 
-  return new RenderResult(element, () => {
+  return renderResult(element, () => {
     const detachFns = attachFns.map((init) => init())
 
-    return () => {
-      for (const detach of detachFns) {
-        detach()
-      }
-    }
+    return () => detachFns.forEach((detach) => detach())
   })
 }
 

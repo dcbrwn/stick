@@ -1,31 +1,26 @@
-import { stickKey, StickBuilder as StickMeta, StickOptions } from './definitions'
+import { stickKey, StickBuilder as StickMeta, StickOptions, RenderResult, Template, StickElement, AnyProps } from './definitions'
+import { appendChild } from './dom'
 
-export function element<T extends Function> (
+export function element<Props extends AnyProps> (
   tagName: string,
-  template: T,
+  template: Template<Props>,
   options: StickOptions = {}
-): T & { [stickKey]: StickMeta } {
-  const element = template as (T & { [stickKey]: StickMeta })
+): StickElement<Props> {
+  const element = template as ((props: Props) => RenderResult) & { [stickKey]: StickMeta }
 
   const elClass = class extends HTMLElement {
-    protected attach: (() => () => void) | undefined
-
-    protected detach: (() => void) | undefined
-
-    protected renderContent (): void {
-      if (this.attach) {
-        return
-      }
-
-      const result = template(this)
-
-      this.appendChild(result.rootElement)
-      this.attach = result.attach
-    }
+    public props!: Props
+    public attach: (() => () => void) | boolean = false
+    public detach: (() => void) | undefined
 
     public connectedCallback () {
-      this.renderContent()
-      this.detach = this.attach!()
+      if (!this.attach) {
+        const [content, attach] = template(this.props)
+        this.attach = attach || true
+        if (content) appendChild(this, content)
+      }
+
+      if (typeof this.attach === 'function') this.detach = this.attach()
     }
 
     public disconnectedCallback () {

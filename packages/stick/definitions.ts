@@ -1,3 +1,9 @@
+import { tuple } from './util'
+
+export type Displayed = string | {
+  toString(): string;
+}
+
 export const stickKey = Symbol('Stick')
 
 export type StickOptions = {
@@ -10,21 +16,19 @@ export interface StickBuilder {
     reflect: Record<string, boolean>
 }
 
-export type StickElement = Function & { [stickKey]: StickBuilder }
+export type RenderResult = [
+  rootElement: Node | null,
+  attach: (() => () => void) | null
+]
 
-export type Renderable = (keyof HTMLElementTagNameMap) | StickElement;
+export const [renderResult, isRenderResult] = tuple<RenderResult>()
 
-export class RenderResult {
-  public readonly rootElement: Node | null
-  public readonly attach: (() => () => void) | null
+export type AnyProps = { [key: string]: any }
 
-  constructor (
-    rootElement: Node | null,
-    init: (() => () => void) | null
-  ) {
-    this.rootElement = rootElement
-    this.attach = init
-  }
-}
+export type Template<Props extends AnyProps> = (props: Props) => RenderResult
 
-export type Renderer = (tag: Renderable, props: Record<string, any>) => RenderResult
+export type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickBuilder }
+
+export type Renderable = (keyof HTMLElementTagNameMap) | StickElement<AnyProps>
+
+export type Renderer = (tag: Renderable, props: AnyProps) => RenderResult

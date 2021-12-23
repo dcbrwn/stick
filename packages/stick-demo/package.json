@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "watch": "parcel serve --no-cache ./index.html",
+    "build": "parcel build --no-cache ./index.html",
     "test": "exit 1"
   },
   "author": "",
