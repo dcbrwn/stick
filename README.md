@@ -37,7 +37,6 @@ element('x-app', () => {
 
 ## TODO
 
-- Event management
 - Conditional rendering
 - Observable collection rendering
 - Refine API

@@ -1,5 +1,5 @@
 import { element } from 'stick'
-import { O, fromEvent, map, throttle } from 'stick/o'
+import { O, fromEvent, map, throttle, thunk } from 'stick/o'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -40,8 +40,17 @@ const TestElement = element('x-update-perf', (props: { cols: number, rows: numbe
 })
 
 element('x-app', () => {
+  const fnHandler = () => console.log('Handled in callback')
+
+  const thunkHandler = thunk((events) => {
+    return map(events, () => console.log('Handled with observables'))
+  })
+
   return <div>
-    <h1>Test</h1>
+    <h1>Testbed</h1>
+    <p>
+      Event handlers: <button onClick={fnHandler}>Callback</button> <button onClick={thunkHandler}>Observer</button>
+    </p>
     <TestElement cols={10} rows={100} />
   </div>
 })

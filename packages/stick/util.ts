@@ -42,5 +42,5 @@ export function toString (value: Displayed): string {
 
 const re = /([a-z0-9])([A-Z])/g
 export function camelToKebab (value: string): string {
-  return value.replace(re, (match, tail, head) => `${tail}-${head.toLowerCase()}`)
+  return value[0].toLowerCase() + value.slice(1).replace(re, (match, tail, head) => `${tail}-${head.toLowerCase()}`)
 }

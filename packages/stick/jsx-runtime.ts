@@ -5,6 +5,8 @@ import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
 
+type EventHandler<E extends Event> = ((event: E) => boolean | undefined | void) | Thunk<E, void>
+
 export namespace JSX {
   interface ElementProps {
     children?: (string | O<any> | Renderer)[]
@@ -15,6 +17,8 @@ export namespace JSX {
     // https://github.com/preactjs/preact/blob/9d761c56bafc77be48780885391dd6f72ba23359/src/jsx.d.ts#L622
     title?: AttrValue<Displayed>
     style?: AttrValue<Displayed>
+
+    onClick?: EventHandler<MouseEvent>
   }
 
   export interface IntrinsicElements {
@@ -51,7 +55,7 @@ export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
     }
   }
 
-  const setEvent = (key: string, handler: ((event: Event) => boolean) | Thunk<Event, unknown>) => {
+  const setEvent = (key: string, handler: EventHandler<Event>) => {
     const eventType = camelToKebab(key.slice(2))
 
     if (isThunk(handler)) {
