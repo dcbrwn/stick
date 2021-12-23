@@ -10,23 +10,25 @@ This is a POC implementation of a rendering library with following goals:
 
 ```tsx
 import { element } from 'stick'
-import { O, fromEvent } from 'stick/o'
+import { O, fromEvent, map } from 'stick/o'
 
 // element() creates a WebComponent, custom HTML tag, that can be used as a regular HTML element.
 const CoordsViewer = element('x-coords', (props: { coords: O<[number, number]> }) => {
   // This function is called only once, when element is constructed.
 
   // Decompose the observable with coordinates
-  const x = props.coords.map(v => v[0])
-  const y = props.coords.map(v => v[1])
+  const x = map(props.coords, v => v[0])
+  const y = map(props.coords, v => v[1])
 
   // Render the DOM. JSX here actually renders DOM nodes and remembers places, that need dynamic updates.
   return <span>({x}, {y})</span>
 })
 
 element('x-app', () => {
-  const mouseCoords = fromEvent<MouseEvent>(document, 'mousemove')
-    .map((event): [number, number] => [event.pageX, event.pageY])
+  const mouseCoords = map(
+    fromEvent<MouseEvent>(document, 'mousemove'),
+    (event): [number, number] => [event.pageX, event.pageY]
+  )
 
   return <main>
     <h1>A somewhat lacking example</h1>
