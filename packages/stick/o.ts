@@ -1,57 +1,64 @@
 import { on } from './dom'
-import { createTag } from './util'
+import {createTag, tuple} from './util'
 
 type Observer<T> = (value: T) => void
 type Producer<T> = (next: Observer<T>) => (() => void) | void
 
-export type O<T> = (observer?: Observer<T>) => (() => void)
+export type O<T> = (observer: Observer<T>) => (() => number)
 
-const [tagObservable, isObservable] = createTag<O<unknown>>()
+export const [tagObservable, isObservable] = createTag<O<unknown>>()
 
-export { isObservable }
-
-export function observable<T> (producer: Producer<T>): O<T> {
+export function observable<T> (): [O<T>, (value: T) => void] {
   const observers = new Set<Observer<T>>()
-  let detach: (() => void) | true | undefined
 
-  function next (value: T): void {
-    observers.forEach((observer) => observer(value))
-  }
+  return [
+    tagObservable((observer: Observer<T>): (() => number) => {
+      observers.add(observer)
 
-  function subscribe (observer: Observer<T> = () => {}): (() => void) {
-    if (!detach) {
-      detach = producer(next) || true
-    }
+      return () => {
+        if (!observers.has(observer)) {
+          throw new Error('You fool!')
+        }
 
-    observers.add(observer)
+        observers.delete(observer)
 
-    return () => {
-      if (!observers.has(observer)) {
-        throw new Error('You fool!')
+        return observers.size
       }
-
-      observers.delete(observer)
-
-      if (observers.size === 0 && detach) {
-        if (typeof detach === 'function') detach()
-        detach = undefined
-      }
-    }
-  }
-
-  return tagObservable(subscribe)
+    }),
+    (value: T) => observers.forEach((observer) => observer(value)),
+  ]
 }
 
-export type Thunk<In, Out> = (input: O<In>) => O<Out>
+export function fromProducer<T> (producer: Producer<T>): O<T> {
+  const [observe, next] = observable<T>()
+  let stopProducer: (() => void) | true | undefined
 
-export const [thunk, isThunk] = createTag<(input: O<unknown>) => O<unknown>>()
+  return tagObservable((observer: Observer<T>): (() => number) => {
+    if (!stopProducer) {
+      stopProducer = producer(next) || true
+    }
+
+    const forget = observe(observer)
+
+    return () => {
+      const observersLeft = forget()
+
+      if (observersLeft === 0) {
+        if (typeof stopProducer === 'function') stopProducer()
+        stopProducer = undefined
+      }
+
+      return observersLeft
+    }
+  })
+}
 
 export function fromEvent<E extends Event> (
   target: EventTarget,
   eventType: E['type'],
   options: EventListenerOptions = {}
 ): O<E> {
-  return observable<E>((next) => {
+  return fromProducer<E>((next) => {
     const listener = next as Observer<Event>
 
     return on(target, eventType, listener, options)
@@ -59,7 +66,7 @@ export function fromEvent<E extends Event> (
 }
 
 export function throttle<T> (input: O<T>): O<T> {
-  return observable((next) => {
+  return fromProducer((next) => {
     let nextFrame: number | undefined
     let nextValue: T | undefined
 
@@ -78,7 +85,7 @@ export function throttle<T> (input: O<T>): O<T> {
 }
 
 export function map<T, R> (input: O<T>, fn: (value: T) => R): O<R> {
-  return observable<R>((next) => {
+  return fromProducer<R>((next) => {
     return input((value) => next(fn(value)))
   })
 }

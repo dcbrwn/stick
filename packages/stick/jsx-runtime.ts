@@ -1,11 +1,11 @@
 import { Renderable, Renderer, stickKey, isRenderResult, renderResult, AnyProps, Displayed, Fragment, StickBuilder } from './definitions'
 import { createElement, on, setAttr, createTextNode, createFragment } from './dom'
-import { fromEvent, isObservable, isThunk, O, Thunk } from './o'
+import { isObservable, O } from './o'
 import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
 
-type EventHandler<E extends Event> = ((event: E) => boolean | undefined | void) | Thunk<E, void>
+type EventHandler<E extends Event> = ((event: E) => boolean | undefined | void)
 
 export namespace JSX {
   interface ElementProps {
@@ -30,13 +30,7 @@ const eventHandlerKey = /^on[A-Z]/
 
 const bindEventHandler = (element: Element, key: string, handler: EventHandler<Event>) => {
   const eventType = camelToKebab(key.slice(2))
-
-  if (isThunk(handler)) {
-    return () => handler(fromEvent(element, eventType))(/* subscribe for side effects */)
-  } else {
-    const eventHandler = handler as (event: Event) => boolean
-    return () => on(element, eventType, eventHandler)
-  }
+  return () => on(element, eventType, handler)
 }
 
 const bindProp = (
