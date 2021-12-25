@@ -1,5 +1,6 @@
 import { element } from 'stick'
-import {O, fromEvent, map, throttle, observable} from 'stick/o'
+import { O, fromEvent, map, throttle, observable, merge, reduce, of } from 'stick/o'
+import { pipe } from "stick/pipe";
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -12,8 +13,8 @@ const TestElement = element('x-update-perf', (props: { cols: number, rows: numbe
   const body = []
   for (let i = 0; i < props.rows; i += 1) {
     for (let j = 0; j < props.cols; j += 1) {
-      const x = map(mouseMove, (event) => event.pageX * i)
-      const y = map(mouseMove, (event) => event.pageY * j)
+      const x = pipe(mouseMove, map((event) => event.pageX * i))
+      const y = pipe(mouseMove, map((event) => event.pageY * j))
 
       // const value = timer.map((time) => time * i * j)
       const style = `
@@ -39,17 +40,28 @@ const TestElement = element('x-update-perf', (props: { cols: number, rows: numbe
   return <div style="position: relative; font-family: monospace">{body}</div>
 })
 
-element('x-app', () => {
-  const fnHandler = () => console.log('Handled in callback')
+const Counter = element('x-counter', () => {
+  const [inc$, handleInc] = observable()
+  const [dec$, handleDec] = observable()
 
-  const [$click, handleClick] = observable<MouseEvent>()
-  map($click, () => console.log('Handled with observables'))
+  const count = pipe(
+    merge(
+      of(0),
+      map(() => 1)(inc$),
+      map(() => -1)(dec$),
+    ),
+    reduce((counter, change: number) => counter + change, 0)
+  )
 
   return <>
+    Count <button onClick={handleInc}>inc</button> <button onClick={handleDec}>dec</button>: {count}
+  </>
+})
+
+element('x-app', () => {
+  return <>
     <h1>Testbed</h1>
-    <p>
-      Event handlers: <button onClick={fnHandler}>Callback</button> <button onClick={handleClick}>Observer</button>
-    </p>
+    <Counter />
     <TestElement cols={10} rows={100} />
   </>
 })

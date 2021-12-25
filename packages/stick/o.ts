@@ -4,6 +4,8 @@ import {createTag, tuple} from './util'
 type Observer<T> = (value: T) => void
 type Producer<T> = (next: Observer<T>) => (() => void) | void
 
+export type Operator<In, Out> = (input: O<In>) => O<Out>
+
 export type O<T> = (observer: Observer<T>) => (() => number)
 
 export const [tagObservable, isObservable] = createTag<O<unknown>>()
@@ -25,7 +27,9 @@ export function observable<T> (): [O<T>, (value: T) => void] {
         return observers.size
       }
     }),
-    (value: T) => observers.forEach((observer) => observer(value)),
+    (value: T) => {
+      observers.forEach((observer) => observer(value))
+    },
   ]
 }
 
@@ -65,6 +69,13 @@ export function fromEvent<E extends Event> (
   })
 }
 
+export function of<T> (...items: T[]): O<T> {
+  return fromProducer<T> ((next) => {
+    console.log(items)
+    for (const item of items) next(item)
+  })
+}
+
 export function throttle<T> (input: O<T>): O<T> {
   return fromProducer((next) => {
     let nextFrame: number | undefined
@@ -84,8 +95,29 @@ export function throttle<T> (input: O<T>): O<T> {
   })
 }
 
-export function map<T, R> (input: O<T>, fn: (value: T) => R): O<R> {
+export const map = <T, R> (fn: (value: T) => R) => (input: O<T>): O<R> => {
   return fromProducer<R>((next) => {
     return input((value) => next(fn(value)))
+  })
+}
+
+export const reduce = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
+  (input: O<Value>): O<Memo> => {
+    return fromProducer<Memo>((next) => {
+      let memo = init
+      return input((value) => {
+        next(memo = fn(memo, value))
+      })
+    })
+  }
+
+export type UnifyO<T extends unknown[]> = T extends [O<infer R>, ...(infer Rest)]
+  ? R | UnifyO<Rest>
+  : never
+
+export function merge<T extends O<unknown>[]>(...inputs: T): O<UnifyO<T>> {
+  return fromProducer<UnifyO<T>>((next) => {
+    const unsubs = inputs.map((observe) => observe(next as Observer<unknown>))
+    return () => unsubs.forEach(unsub => unsub())
   })
 }
