@@ -1,25 +1,5 @@
 import { on } from '../dom'
-import { O, observable, Observer, tagObservable } from './observable'
-
-type Producer<T> = (next: Observer<T>) => (() => void) | void
-
-const noop = () => {}
-
-export function fromProducer<T> (producer: Producer<T>): O<T> {
-  const [observe, next] = observable<T>()
-  let stopProducer: (() => void) = noop
-
-  return tagObservable((observer: Observer<T>): (() => void) => {
-    const forget = observe(observer)
-    stopProducer = producer(next) || noop
-
-    return () => {
-      forget()
-      stopProducer()
-      stopProducer = noop
-    }
-  })
-}
+import { O, Observer, tagObservable } from './observable'
 
 export function fromArray<T> (items: T[]): O<T> {
   return tagObservable<O<T>>((observer: Observer<T>) => {
@@ -34,7 +14,7 @@ export function fromEvent<E extends Event> (
   eventType: E['type'],
   options: EventListenerOptions = {}
 ): O<E> {
-  return fromProducer<E>((next) => {
+  return tagObservable((next) => {
     const listener = next as Observer<Event>
 
     return on(target, eventType, listener, options)

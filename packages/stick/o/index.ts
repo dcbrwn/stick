@@ -1,9 +1,10 @@
 export {
-  O, observable, isObservable
+  type O,
+  observable,
+  isObservable
 } from './observable'
 
 export {
-  fromProducer,
   fromArray,
   fromEvent
 } from './sources'
@@ -13,10 +14,10 @@ export {
 } from './pipe'
 
 export {
-  Operator,
+  type Operator,
   map,
   filter,
   reduce,
   merge,
-  throttle
+  throttleToFrame
 } from './operators'

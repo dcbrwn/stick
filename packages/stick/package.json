@@ -1,8 +1,10 @@
 {
   "name": "stick",
   "version": "0.0.1",
-  "main": "./index.ts",
+  "source": "index.ts",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "parcel build ./index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -14,7 +16,8 @@
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.2.0"
+    "eslint-plugin-promise": "^5.2.0",
+    "parcel": "^2.0.1"
   },
   "repository": {
     "type": "git",

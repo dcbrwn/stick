@@ -1,36 +1,54 @@
-import { O, Observer } from './observable'
-import { fromProducer } from './sources'
+import { O, Observer, tagObservable } from './observable'
 
 export type Operator<In, Out> = (input: O<In>) => O<Out>
 
-export function throttle<T> (input: O<T>): O<T> {
-  return fromProducer((next) => {
-    let nextFrame: number | undefined
-    let nextValue: T | undefined
+export function throttleToFrame<T> (input: O<T>): O<T> {
+  const nextFrameTasks: VoidFunction[] = []
 
-    const handleNextFrame = () => {
+  function handleTasks () {
+    for (let i = 0, len = nextFrameTasks.length; i < len; i += 1) {
+      nextFrameTasks[i]()
+    }
+    nextFrameTasks.length = 0
+  }
+
+  function addTask (task: VoidFunction) {
+    if (nextFrameTasks.length === 0) {
+      requestAnimationFrame(handleTasks)
+    }
+
+    nextFrameTasks.push(task)
+  }
+
+  return tagObservable((next) => {
+    let nextValue: T | undefined
+    let isScheduled = false
+
+    function handleNextFrame () {
+      isScheduled = false
       next(nextValue!)
-      nextFrame = undefined
     }
 
     return input((value) => {
       nextValue = value
-      if (nextFrame === undefined) {
-        nextFrame = requestAnimationFrame(handleNextFrame)
+
+      if (!isScheduled) {
+        isScheduled = true
+        addTask(handleNextFrame)
       }
     })
   })
 }
 
 export const map = <T, R> (fn: (value: T) => R) => (input: O<T>): O<R> => {
-  return fromProducer<R>((next) => {
+  return tagObservable((next) => {
     return input((value) => next(fn(value)))
   })
 }
 
 export const reduce = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
   (input: O<Value>): O<Memo> => {
-    return fromProducer<Memo>((next) => {
+    return tagObservable((next) => {
       let memo = init
       return input((value) => {
         next(memo = fn(memo, value))
@@ -39,7 +57,7 @@ export const reduce = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, ini
   }
 
 export const filter = <T> (fn: (value: T) => boolean) => (input: O<T>): O<T> => {
-  return fromProducer<T>((next) => {
+  return tagObservable((next) => {
     return input((value) => {
       if (fn(value)) next(value)
     })
@@ -51,7 +69,7 @@ type UnifyO<T extends unknown[]> = T extends [O<infer R>, ...(infer Rest)]
   : never
 
 export function merge<T extends O<unknown>[]> (...inputs: T): O<UnifyO<T>> {
-  return fromProducer<UnifyO<T>>((next) => {
+  return tagObservable((next) => {
     const unsubs = inputs.map((observe) => observe(next as Observer<unknown>))
     return () => unsubs.forEach(unsub => unsub())
   })

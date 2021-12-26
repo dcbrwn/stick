@@ -37,3 +37,5 @@ export function element<Props extends AnyProps> (
 
   return Object.assign(template, { [stickKey]: meta })
 }
+
+export * as o from './o'

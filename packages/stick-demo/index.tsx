@@ -1,6 +1,5 @@
 import { element } from 'stick'
-import { O, fromEvent, map, throttle, observable, merge, reduce, fromArray, pipe } from 'stick/o'
-import './bench'
+import { O, fromEvent, map, throttleToFrame, observable, merge, reduce, fromArray, pipe } from 'stick/o'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -8,7 +7,7 @@ const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) =
 
 const TestElement = element('x-update-perf', (props: { cols: number, rows: number }) => {
   // const timer = createTimer()
-  const mouseMove = throttle(fromEvent<MouseEvent>(document, 'mousemove'))
+  const mouseMove = throttleToFrame(fromEvent<MouseEvent>(document, 'mousemove'))
 
   const body = []
   for (let i = 0; i < props.rows; i += 1) {
