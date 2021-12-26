@@ -1,6 +1,5 @@
-import { O, Operator } from "./o";
-
-export { pipe }
+import { O } from './observable'
+import { Operator } from './operators'
 
 function pipe<In, Out>(input: O<In>, op1: Operator<In, Out>): O<Out>
 function pipe<In, A, Out>(
@@ -37,8 +36,15 @@ function pipe<In, A, B, C, D, Out>(
     Operator<D, Out>,
   ]
 ): O<Out>
-function pipe(input: O<any>, ...ops: Operator<any, any>[]): O<unknown> {
-  if (ops.length === 0) return input
+function pipe (input: O<any>, ...ops: Operator<any, any>[]): O<unknown> {
+  const len = ops.length
+  let result = input
 
-  return ops.reduce<O<unknown>>((memo, operator) => operator(memo), input)
+  for (let i = 0; i < len; i += 1) {
+    result = ops[i](result)
+  }
+
+  return result
 }
+
+export { pipe }

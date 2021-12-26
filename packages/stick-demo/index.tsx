@@ -1,6 +1,6 @@
 import { element } from 'stick'
-import { O, fromEvent, map, throttle, observable, merge, reduce, of } from 'stick/o'
-import { pipe } from "stick/pipe";
+import { O, fromEvent, map, throttle, observable, merge, reduce, fromArray, pipe } from 'stick/o'
+import './bench'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -46,9 +46,9 @@ const Counter = element('x-counter', () => {
 
   const count = pipe(
     merge(
-      of(0),
+      fromArray([0]),
       map(() => 1)(inc$),
-      map(() => -1)(dec$),
+      map(() => -1)(dec$)
     ),
     reduce((counter, change: number) => counter + change, 0)
   )
