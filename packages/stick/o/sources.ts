@@ -3,21 +3,20 @@ import { O, observable, Observer, tagObservable } from './observable'
 
 type Producer<T> = (next: Observer<T>) => (() => void) | void
 
+const noop = () => {}
+
 export function fromProducer<T> (producer: Producer<T>): O<T> {
   const [observe, next] = observable<T>()
-  let stopProducer: (() => void) | true | undefined
+  let stopProducer: (() => void) = noop
 
   return tagObservable((observer: Observer<T>): (() => void) => {
     const forget = observe(observer)
-
-    if (!stopProducer) {
-      stopProducer = producer(next) || true
-    }
+    stopProducer = producer(next) || noop
 
     return () => {
       forget()
-      if (typeof stopProducer === 'function') stopProducer()
-      stopProducer = undefined
+      stopProducer()
+      stopProducer = noop
     }
   })
 }
