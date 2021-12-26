@@ -12,6 +12,7 @@ This is a POC implementation of a rendering library with following goals:
 import { element } from 'stick'
 import { O, fromEvent, map } from 'stick/o'
 
+
 // element() creates a WebComponent, custom HTML tag, that can be used as a regular HTML element.
 const CoordsViewer = element('x-coords', (props: { coords: O<[number, number]> }) => {
   // This function is called only once, when element is constructed.
@@ -24,6 +25,25 @@ const CoordsViewer = element('x-coords', (props: { coords: O<[number, number]> }
   return <span>({x}, {y})</span>
 })
 
+
+const Counter = element('x-counter', (props: { init: number }) => {
+  // Event sources, are observables that can be used as event handlers in JSX templates
+  const inc$ = eventSource(() => 1)
+  const dec$ = eventSource(() => -1)
+
+  const count = pipe(
+    merge(fromArray([0]), inc$, dec$),
+    scan((counter, change) => counter + change, props.init)
+  )
+
+  return <>
+    Count <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>: {count}
+  </>
+})
+
+
+// Root component of this example
+// Insert it as <x-app></x-app> in DOM somewhere, and it will render itself
 element('x-app', () => {
   const mouseCoords = map(
     fromEvent<MouseEvent>(document, 'mousemove'),
@@ -33,6 +53,7 @@ element('x-app', () => {
   return <main>
     <h1>A somewhat lacking example</h1>
     <p>Mouse is at: <CoordsViewer coords={mouseCoords} /></p>
+    <p><Counter init={9000} /></p>
   </main>
 })
 ```

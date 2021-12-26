@@ -1,5 +1,5 @@
-import { element } from 'stick'
-import { O, fromEvent, map, throttleToFrame, observable, merge, reduce, fromArray, pipe } from 'stick/o'
+import { element, eventSource } from 'stick'
+import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe } from 'stick/o'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -39,28 +39,24 @@ const TestElement = element('x-update-perf', (props: { cols: number, rows: numbe
   return <div style="position: relative; font-family: monospace">{body}</div>
 })
 
-const Counter = element('x-counter', () => {
-  const [inc$, handleInc] = observable()
-  const [dec$, handleDec] = observable()
+const Counter = element('x-counter', (props: { init: number }) => {
+  const inc$ = eventSource(() => 1)
+  const dec$ = eventSource(() => -1)
 
   const count = pipe(
-    merge(
-      fromArray([0]),
-      map(() => 1)(inc$),
-      map(() => -1)(dec$)
-    ),
-    reduce((counter, change: number) => counter + change, 0)
+    merge(fromArray([0]), inc$, dec$),
+    scan((counter, change) => counter + change, props.init)
   )
 
   return <>
-    Count <button onClick={handleInc}>inc</button> <button onClick={handleDec}>dec</button>: {count}
+    Count <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>: {count}
   </>
 })
 
 element('x-app', () => {
   return <>
     <h1>Testbed</h1>
-    <Counter />
+    <Counter init={9000} />
     <TestElement cols={10} rows={100} />
   </>
 })

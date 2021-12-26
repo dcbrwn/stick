@@ -17,7 +17,7 @@ export {
   type Operator,
   map,
   filter,
-  reduce,
+  scan,
   merge,
   throttleToFrame
 } from './operators'

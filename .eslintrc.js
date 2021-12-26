@@ -21,5 +21,6 @@ module.exports = {
     VoidFunction: false
   },
   rules: {
+    'no-redeclare': 0
   }
 }

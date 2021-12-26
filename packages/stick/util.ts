@@ -44,3 +44,7 @@ const re = /([a-z0-9])([A-Z])/g
 export function camelToKebab (value: string): string {
   return value[0].toLowerCase() + value.slice(1).replace(re, (match, tail, head) => `${tail}-${head.toLowerCase()}`)
 }
+
+export const noop = (...args: unknown[]): void => {}
+
+export const identity = <T>(input: T): T => input

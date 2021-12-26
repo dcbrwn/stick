@@ -39,3 +39,5 @@ export function element<Props extends AnyProps> (
 }
 
 export * as o from './o'
+
+export * from './eventSource'
