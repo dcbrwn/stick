@@ -41,11 +41,11 @@ const bindProp = (
   meta?: StickBuilder
 ) => {
   const needsReflect = !meta || key in meta.reflect
-  let attach
+  let mount
 
   if (needsReflect) {
     if (isObservable(value)) {
-      attach = () => value((nextValue) => setAttr(element, key, nextValue as Displayed))
+      mount = () => value((nextValue) => setAttr(element, key, nextValue as Displayed))
     } else {
       setAttr(element, key, value as Displayed)
     }
@@ -60,7 +60,7 @@ const bindProp = (
     element.props[key] = value
   }
 
-  return attach
+  return mount
 }
 
 const createRoot = (tag: Renderable): DocumentFragment | HTMLElement => {
@@ -71,12 +71,12 @@ const createRoot = (tag: Renderable): DocumentFragment | HTMLElement => {
 export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
   const element = createRoot(tag)
   const { children, ...properties } = props
-  const attachFns: (() => () => void)[] = []
+  const mountFns: (() => () => void)[] = []
 
   for (const [key, value] of Object.entries(properties)) {
     if (key.startsWith('_')) continue
     else if (eventHandlerKey.test(key)) {
-      attachFns.push(bindEventHandler(element as HTMLElement, key, value))
+      mountFns.push(bindEventHandler(element as HTMLElement, key, value))
     } else {
       bindProp(element as HTMLElement, key, value, Reflect.get(element, stickKey))
     }
@@ -89,12 +89,12 @@ export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
       let childElement: Node | null = null
 
       if (isRenderResult(child)) {
-        const [rootElement, attach] = child
+        const [rootElement, mount] = child
         childElement = rootElement
-        if (attach) attachFns.push(attach)
+        if (mount) mountFns.push(mount)
       } else if (isObservable(child)) {
         const textNode = createTextNode('')
-        attachFns.push(() => child((value) => {
+        mountFns.push(() => child((value) => {
           textNode.data = toString(value as Displayed)
         }))
         childElement = textNode
@@ -109,9 +109,9 @@ export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
   }
 
   return renderResult(element, () => {
-    const detachFns = attachFns.map((init) => init())
+    const unmountFns = mountFns.map((init) => init())
 
-    return () => detachFns.forEach((detach) => detach())
+    return () => unmountFns.forEach((unmount) => unmount())
   })
 }
 

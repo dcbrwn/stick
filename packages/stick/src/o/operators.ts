@@ -1,4 +1,4 @@
-import { O, Observer, tagObservable } from './observable'
+import { O, tagObservable } from './observable'
 
 export type Operator<In, Out> = (input: O<In>) => O<Out>
 
@@ -20,13 +20,13 @@ export function throttleToFrame<T> (input: O<T>): O<T> {
     nextFrameTasks.push(task)
   }
 
-  return tagObservable((next) => {
+  return tagObservable((notify) => {
     let nextValue: T | undefined
     let isScheduled = false
 
     function handleNextFrame () {
       isScheduled = false
-      next(nextValue!)
+      notify(nextValue!)
     }
 
     return input((value) => {
@@ -41,36 +41,25 @@ export function throttleToFrame<T> (input: O<T>): O<T> {
 }
 
 export const map = <T, R> (fn: (value: T) => R) => (input: O<T>): O<R> => {
-  return tagObservable((next) => {
-    return input((value) => next(fn(value)))
+  return tagObservable((notify) => {
+    return input((value) => notify(fn(value)))
   })
 }
 
 export const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
   (input: O<Value>): O<Memo> => {
-    return tagObservable((next) => {
+    return tagObservable((notify) => {
       let memo = init
       return input((value) => {
-        next(memo = fn(memo, value))
+        notify(memo = fn(memo, value))
       })
     })
   }
 
 export const filter = <T> (fn: (value: T) => boolean) => (input: O<T>): O<T> => {
-  return tagObservable((next) => {
+  return tagObservable((notify) => {
     return input((value) => {
-      if (fn(value)) next(value)
+      if (fn(value)) notify(value)
     })
-  })
-}
-
-type UnifyO<T extends unknown[]> = T extends [O<infer R>, ...(infer Rest)]
-  ? R | UnifyO<Rest>
-  : never
-
-export function merge<T extends O<unknown>[]> (...inputs: T): O<UnifyO<T>> {
-  return tagObservable((next) => {
-    const unsubs = inputs.map((observe) => observe(next as Observer<unknown>))
-    return () => unsubs.forEach(unsub => unsub())
   })
 }

@@ -1,7 +1,6 @@
 import { element, eventSource } from 'stick'
 import { match } from 'stick/directives'
-import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe } from 'stick/o'
-import { broadcast } from 'stick/o/sources'
+import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe, broadcast } from 'stick/o'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>

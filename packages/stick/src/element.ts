@@ -14,30 +14,26 @@ export function element<Props extends AnyProps> (
   customElements.define(tagName, class extends HTMLElement {
     public [stickKey] = meta
     public props!: Props
-    public attach: (() => () => void) | boolean = false
-    public detach: (() => void) | undefined
+    public mount: (() => () => void) | boolean = false
+    public unmount: (() => void) | undefined
 
     public connectedCallback () {
-      if (!this.attach) {
-        const [content, attach] = template(this.props)
-        this.attach = attach || true
+      if (!this.mount) {
+        const [content, mount] = template(this.props)
+        this.mount = mount || true
         if (content) appendChild(this, content)
       }
 
-      if (typeof this.attach === 'function') this.detach = this.attach()
+      if (typeof this.mount === 'function') this.unmount = this.mount()
     }
 
     public disconnectedCallback () {
-      if (this.detach) {
-        this.detach()
-        this.detach = undefined
+      if (this.unmount) {
+        this.unmount()
+        this.unmount = undefined
       }
     }
   })
 
   return Object.assign(template, { [stickKey]: meta })
 }
-
-export * as o from './o'
-
-export * from './eventSource'

@@ -23,7 +23,7 @@ export function observable<T> (): [O<T>, (value: T) => void] {
         observer = undefined
       }
     }),
-    function next (value: T) {
+    (value: T) => {
       if (observer) observer(value)
     }
   ]

@@ -39,3 +39,14 @@ export function broadcast<T> (input: O<T>): O<T> {
     }
   })
 }
+
+type UnifyO<T extends unknown[]> = T extends [O<infer R>, ...(infer Rest)]
+  ? R | UnifyO<Rest>
+  : never
+
+export function merge<T extends O<unknown>[]> (...inputs: T): O<UnifyO<T>> {
+  return tagObservable((notify) => {
+    const forgetFns = inputs.map((observe) => observe(notify as Observer<unknown>))
+    return () => forgetFns.forEach(forget => forget())
+  })
+}

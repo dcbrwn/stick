@@ -1,4 +1,4 @@
 .parcel-cache
 node_modules
 .idea
-dist
+/packages/stick-demo/dist

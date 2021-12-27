@@ -4,11 +4,11 @@ import { O } from './o'
 export function match<T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult {
   const cache = new Map<T, RenderResult>()
   const anchor = document.createElement('div')
-  let detach: VoidFunction | undefined
+  let unmount: VoidFunction | undefined
 
   return renderResult(anchor, () => {
     const forget = observe((value) => {
-      if (detach) detach()
+      if (unmount) unmount()
 
       let next = cache.get(value)
 
@@ -17,7 +17,7 @@ export function match<T> (observe: O<T>, renderer: (value: T) => RenderResult): 
         cache.set(value, next)
       }
 
-      const [element, attach] = next
+      const [element, mount] = next
 
       if (element) {
         anchor.replaceChildren(element)
@@ -25,11 +25,11 @@ export function match<T> (observe: O<T>, renderer: (value: T) => RenderResult): 
         anchor.innerHTML = ''
       }
 
-      if (attach) detach = attach()
+      if (mount) unmount = mount()
     })
 
     return () => {
-      if (detach) detach()
+      if (unmount) unmount()
       forget()
     }
   })

@@ -18,7 +18,7 @@ export interface StickBuilder {
 
 export type RenderResult = [
   rootElement: Node | null,
-  attach: (() => () => void) | null
+  mount: (() => () => void) | null
 ]
 
 export const [renderResult, isRenderResult] = tuple<RenderResult>()

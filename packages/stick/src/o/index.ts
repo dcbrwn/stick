@@ -6,7 +6,9 @@ export {
 
 export {
   fromArray,
-  fromEvent
+  fromEvent,
+  broadcast,
+  merge
 } from './sources'
 
 export {
@@ -18,6 +20,5 @@ export {
   map,
   filter,
   scan,
-  merge,
   throttleToFrame
 } from './operators'
