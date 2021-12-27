@@ -1,5 +1,7 @@
 import { element, eventSource } from 'stick'
+import { match } from 'stick/directives'
 import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe } from 'stick/o'
+import { broadcast } from 'stick/o/sources'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -45,11 +47,24 @@ const Counter = element('x-counter', (props: { init: number }) => {
 
   const count = pipe(
     merge(fromArray([0]), inc$, dec$),
-    scan((counter, change) => counter + change, props.init)
+    scan((counter, change) => counter + change, props.init),
+    broadcast
+  )
+
+  const isEven = pipe(
+    count,
+    map((value) => value % 2 === 0)
   )
 
   return <>
     Count <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>: {count}
+    {match(isEven, (value) => {
+      if (value) {
+        return <h1>Even</h1>
+      } else {
+        return <h3>Odd</h3>
+      }
+    })}
   </>
 })
 

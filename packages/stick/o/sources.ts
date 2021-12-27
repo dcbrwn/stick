@@ -2,9 +2,9 @@ import { on } from '../dom'
 import { O, Observer, tagObservable } from './observable'
 
 export function fromArray<T> (items: T[]): O<T> {
-  return tagObservable<O<T>>((observer: Observer<T>) => {
+  return tagObservable<O<T>>((notify: Observer<T>) => {
     // eslint-disable-next-line prefer-const
-    for (let i = 0, len = items.length; i < len; i += 1) observer(items[i])
+    for (let i = 0, len = items.length; i < len; i += 1) notify(items[i])
     return () => {}
   })
 }
@@ -14,9 +14,28 @@ export function fromEvent<E extends Event> (
   eventType: E['type'],
   options: EventListenerOptions = {}
 ): O<E> {
-  return tagObservable((next) => {
-    const listener = next as Observer<Event>
+  return tagObservable((notify) => {
+    const listener = notify as Observer<Event>
 
     return on(target, eventType, listener, options)
+  })
+}
+
+export function broadcast<T> (input: O<T>): O<T> {
+  const observers = new Set<Observer<T>>()
+  let forget: VoidFunction | undefined
+
+  return tagObservable((notify) => {
+    if (observers.size === 0) {
+      forget = input((value) => observers.forEach((notify) => notify(value)))
+    }
+
+    observers.add(notify)
+
+    return () => {
+      observers.delete(notify)
+
+      if (observers.size === 0) forget!()
+    }
   })
 }

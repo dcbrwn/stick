@@ -60,7 +60,7 @@ element('x-app', () => {
 
 ## TODO
 
-- Conditional rendering
+- Robust anchors for fragments
 - Observable collection rendering
 - Refine API
 - Cover the API with tests

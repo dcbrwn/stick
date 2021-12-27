@@ -11,6 +11,8 @@ export function observable<T> (): [O<T>, (value: T) => void] {
 
   return [
     tagObservable((newObserver: Observer<T>): (() => void) => {
+      if (observer) throw new Error('No dice!')
+
       observer = newObserver
 
       return () => {
