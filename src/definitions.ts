@@ -17,7 +17,7 @@ export interface StickBuilder {
 }
 
 export type RenderResult = [
-  rootElement: Node | null,
+  rootElement: Element | DocumentFragment | null,
   mount: (() => () => void) | null
 ]
 

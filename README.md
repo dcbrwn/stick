@@ -58,9 +58,12 @@ element('x-app', () => {
 })
 ```
 
+## Caveats
+
+- `match` and `repeat` directives, render into `<s-container>` element. This gives us an ability to easily and cheaply swap rendered content and cache it. The container has `display: contents` so it's not represented in the render tree. The problem is that this interferes with flex/grid layouts and CSS selectors.
+
 ## TODO
 
-- Robust anchors for fragments
 - Observable collection rendering
 - Refine API
 - Cover the API with tests
@@ -70,3 +73,7 @@ element('x-app', () => {
 - docs
 - Async renderer
 - SSR
+
+## Links
+
+- https://html.spec.whatwg.org/multipage/custom-elements.html

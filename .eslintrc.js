@@ -21,6 +21,10 @@ module.exports = {
     VoidFunction: false
   },
   rules: {
+    // This one is broken for cases like `new Map<T, [Element, (() => () => void) | null]>()`
+    // It complains about the space after `Element,`
+    'func-call-spacing': 0,
+    'func-style': [2, 'expression'],
     'no-redeclare': 0
   }
 }

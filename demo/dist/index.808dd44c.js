@@ -821,6 +821,8 @@ parcelHelpers.export(exports, "createComment", ()=>createComment
 );
 parcelHelpers.export(exports, "createFragment", ()=>createFragment
 );
+parcelHelpers.export(exports, "createContainer", ()=>createContainer
+);
 parcelHelpers.export(exports, "on", ()=>on
 );
 parcelHelpers.export(exports, "setAttr", ()=>setAttr
@@ -835,6 +837,15 @@ const createTextNode = (text)=>document.createTextNode(text)
 const createComment = (comment = '')=>document.createComment(comment)
 ;
 const createFragment = ()=>document.createDocumentFragment()
+;
+const CONTAINER_TAG = 's-container';
+customElements.define(CONTAINER_TAG, class extends HTMLElement {
+    constructor(){
+        super();
+        this.style.display = 'contents';
+    }
+});
+const createContainer = ()=>createElement(CONTAINER_TAG)
 ;
 const on = (target, eventType, handler, options)=>{
     target.addEventListener(eventType, handler, options);
@@ -1109,21 +1120,33 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "match", ()=>match
 );
 var _definitions = require("./definitions");
-function match(observe, renderer) {
+var _dom = require("./dom");
+const match = (observe, renderer)=>{
     const cache = new Map();
-    const anchor = document.createElement('div');
     let unmount;
-    return _definitions.renderResult(anchor, ()=>{
+    let currentElement = _dom.createContainer();
+    return _definitions.renderResult(currentElement, ()=>{
         const forget = observe((value)=>{
             if (unmount) unmount();
             let next = cache.get(value);
             if (!next) {
-                next = renderer(value);
+                const [rootElement, mount] = renderer(value);
+                let result;
+                if (rootElement instanceof DocumentFragment) {
+                    result = _dom.createContainer();
+                    result.appendChild(rootElement);
+                } else if (rootElement instanceof Node) result = rootElement;
+                else result = _dom.createContainer();
+                next = [
+                    result,
+                    mount
+                ];
                 cache.set(value, next);
             }
             const [element, mount] = next;
-            if (element) anchor.replaceChildren(element);
-            else anchor.innerHTML = '';
+            console.log(element, value);
+            currentElement.replaceWith(element);
+            currentElement = element;
             if (mount) unmount = mount();
         });
         return ()=>{
@@ -1131,8 +1154,8 @@ function match(observe, renderer) {
             forget();
         };
     });
-}
+};
 
-},{"./definitions":"ls1LZ","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}]},["OJYiz","cHk2S"], "cHk2S", "parcelRequire6524")
+},{"./definitions":"ls1LZ","./dom":"h52FF","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}]},["OJYiz","cHk2S"], "cHk2S", "parcelRequire6524")
 
 //# sourceMappingURL=index.808dd44c.js.map

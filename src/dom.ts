@@ -9,6 +9,17 @@ export const createComment = (comment: string = '') => document.createComment(co
 
 export const createFragment = () => document.createDocumentFragment()
 
+const CONTAINER_TAG = 's-container'
+
+customElements.define(CONTAINER_TAG, class extends HTMLElement {
+  constructor() {
+    super()
+    this.style.display = 'contents'
+  }
+})
+
+export const createContainer = () => createElement(CONTAINER_TAG)
+
 export const on = (target: EventTarget, eventType: string, handler: (e: Event) => boolean | undefined | void, options?: EventListenerOptions) => {
   target.addEventListener(eventType, handler, options)
   return () => target.removeEventListener(eventType, handler, options)

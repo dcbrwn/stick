@@ -11,7 +11,7 @@ export interface StickBuilder {
     reflect: Record<string, boolean>;
 }
 export declare type RenderResult = [
-    rootElement: Node | null,
+    rootElement: Element | DocumentFragment | null,
     mount: (() => () => void) | null
 ];
 export declare const renderResult: <T extends RenderResult>(...items: T) => T, isRenderResult: (obj: unknown) => obj is RenderResult;

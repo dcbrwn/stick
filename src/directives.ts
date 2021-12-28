@@ -1,29 +1,38 @@
 import { renderResult, RenderResult } from './definitions'
+import { createContainer } from './dom'
 import { O } from './o'
 
-export function match<T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult {
-  const cache = new Map<T, RenderResult>()
-  const anchor = document.createElement('div')
+export const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult => {
+  const cache = new Map<T, [Element, (() => () => void) | null]>()
   let unmount: VoidFunction | undefined
+  let currentElement: Element = createContainer()
 
-  return renderResult(anchor, () => {
+  return renderResult(currentElement, () => {
     const forget = observe((value) => {
       if (unmount) unmount()
 
       let next = cache.get(value)
 
       if (!next) {
-        next = renderer(value)
+        const [rootElement, mount] = renderer(value)
+        let result
+        if (rootElement instanceof DocumentFragment) {
+          result = createContainer()
+          result.appendChild(rootElement)
+        } else if (rootElement instanceof Node) {
+          result = rootElement
+        } else {
+          result = createContainer()
+        }
+
+        next = [result, mount]
         cache.set(value, next)
       }
 
       const [element, mount] = next
 
-      if (element) {
-        anchor.replaceChildren(element)
-      } else {
-        anchor.innerHTML = ''
-      }
+      currentElement.replaceWith(element!)
+      currentElement = element!
 
       if (mount) unmount = mount()
     })
