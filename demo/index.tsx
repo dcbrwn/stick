@@ -1,7 +1,6 @@
 import { element, eventSource } from '@stickts/stick'
-import { match, repeat } from '@stickts/stick/directives'
+import { match } from '@stickts/stick/directives'
 import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe, broadcast } from '@stickts/stick/o'
-import { Observer, tagObservable } from "@stickts/stick/o/observable";
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -73,32 +72,9 @@ const Counter = element('x-counter', (props: { init: number }) => {
   </>
 })
 
-const periodic = (ms: number) => tagObservable((observe: Observer<number>) => {
-  const timer = setInterval(() => {
-    observe(Date.now())
-  }, ms)
-
-  return () => clearInterval(timer)
-})
-
-const elements = pipe(
-  periodic(1000),
-  scan((memo: number[], time) => {
-    if (memo.length === 5) return []
-    memo.push(time)
-    return memo
-  }, [])
-)
-
 element('x-app', () => {
-  return <ul>
-    {repeat(elements, (time) => {
-      return <li>{time}</li>
-    })}
-  </ul>
-
   return <>
-    <h1>Testbed {periodic(1000)}</h1>
+    <h1>Testbed</h1>
     <Counter init={9000} />
     <TestElement cols={10} rows={100} />
   </>
