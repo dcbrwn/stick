@@ -43,3 +43,21 @@ export const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): 
     }
   })
 }
+
+// Can't find anything like this in lib.d.ts :(
+type ItemType<T> = T extends (infer Item)[] ? Item : never
+
+export const repeat = <T extends unknown[]> (observe: O<T>, renderer: (value: ItemType<T>) => RenderResult): RenderResult => {
+  const container = createContainer()
+  const cache = new Map<T, [Element, (() => () => void) | null]>()
+
+  return renderResult(container, () => {
+    const forget = observe((collection) => {
+      // TODO: We need a way to render the template only once and reuse
+    })
+
+    return () => {
+      forget()
+    }
+  })
+}
