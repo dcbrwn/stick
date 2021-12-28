@@ -11,12 +11,7 @@ export const createFragment = () => document.createDocumentFragment()
 
 const CONTAINER_TAG = 's-container'
 
-customElements.define(CONTAINER_TAG, class extends HTMLElement {
-  constructor() {
-    super()
-    this.style.display = 'contents'
-  }
-})
+customElements.define(CONTAINER_TAG, class extends HTMLElement {})
 
 export const createContainer = () => createElement(CONTAINER_TAG)
 

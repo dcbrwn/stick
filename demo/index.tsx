@@ -59,9 +59,14 @@ const Counter = element('x-counter', (props: { init: number }) => {
     Count <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>: {count}
     {match(isEven, (value) => {
       if (value) {
-        return <h1>Even</h1>
+        return <>
+          <h1>Even</h1>
+          <p>Counter {count}</p>
+        </>
       } else {
-        return <h3>Odd</h3>
+        return <>
+          <h3>Odd</h3>
+        </>
       }
     })}
   </>

@@ -5,10 +5,6 @@ export const createComment = (comment = '') => document.createComment(comment);
 export const createFragment = () => document.createDocumentFragment();
 const CONTAINER_TAG = 's-container';
 customElements.define(CONTAINER_TAG, class extends HTMLElement {
-    constructor() {
-        super();
-        this.style.display = 'contents';
-    }
 });
 export const createContainer = () => createElement(CONTAINER_TAG);
 export const on = (target, eventType, handler, options) => {
