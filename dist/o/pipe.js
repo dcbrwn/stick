@@ -7,3 +7,4 @@ function pipe(input, ...ops) {
     return result;
 }
 export { pipe };
+//# sourceMappingURL=pipe.js.map

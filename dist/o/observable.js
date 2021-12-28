@@ -20,3 +20,4 @@ export function observable() {
         }
     ];
 }
+//# sourceMappingURL=observable.js.map

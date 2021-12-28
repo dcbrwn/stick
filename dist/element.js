@@ -29,3 +29,4 @@ export function element(tagName, template, options = {}) {
     });
     return Object.assign(template, { [stickKey]: meta });
 }
+//# sourceMappingURL=element.js.map

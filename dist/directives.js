@@ -29,3 +29,4 @@ export function match(observe, renderer) {
         };
     });
 }
+//# sourceMappingURL=directives.js.map

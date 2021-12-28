@@ -16,3 +16,4 @@ export const setAttr = (target, key, value) => {
     }
 };
 export const appendChild = (target, child) => target.appendChild(child);
+//# sourceMappingURL=dom.js.map

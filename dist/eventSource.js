@@ -10,3 +10,4 @@ export function eventSource(map) {
         : next;
     return tagEventSource(eventSource);
 }
+//# sourceMappingURL=eventSource.js.map

@@ -35,3 +35,4 @@ export function merge(...inputs) {
         return () => forgetFns.forEach(forget => forget());
     });
 }
+//# sourceMappingURL=sources.js.map
