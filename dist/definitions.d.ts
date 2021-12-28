@@ -2,6 +2,8 @@ export declare type Displayed = string | {
     toString(): string;
 };
 export declare const stickKey: unique symbol;
+export declare type Nothing = null | undefined | void;
+export declare type Maybe<T> = T | Nothing;
 export declare type StickOptions = {
     tagName?: string;
     reflect?: Record<string, boolean>;
@@ -11,8 +13,8 @@ export interface StickBuilder {
     reflect: Record<string, boolean>;
 }
 export declare type RenderResult = [
-    rootElement: Element | DocumentFragment | null,
-    mount: (() => () => void) | null
+    rootElement: Maybe<Element | DocumentFragment>,
+    mount: Maybe<() => () => void>
 ];
 export declare const renderResult: <T extends RenderResult>(...items: T) => T, isRenderResult: (obj: unknown) => obj is RenderResult;
 export declare type AnyProps = {

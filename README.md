@@ -64,7 +64,6 @@ element('x-app', () => {
 
 ## TODO
 
-- Observable collection rendering
 - Refine API
 - Cover the API with tests
 - Proper styling support

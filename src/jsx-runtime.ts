@@ -1,4 +1,15 @@
-import { Renderable, Renderer, stickKey, isRenderResult, renderResult, AnyProps, Displayed, Fragment, StickBuilder } from './definitions'
+import {
+  Renderable,
+  Renderer,
+  stickKey,
+  isRenderResult,
+  renderResult,
+  AnyProps,
+  Displayed,
+  Fragment,
+  StickBuilder,
+  Maybe
+} from './definitions'
 import { createElement, on, setAttr, createTextNode, createFragment } from './dom'
 import { EventSource, isEventSource } from './eventSource'
 import { isObservable, O } from './o'
@@ -86,7 +97,7 @@ export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
     const c = Array.isArray(children) && !isRenderResult(children) ? children : [children]
 
     for (const child of c) {
-      let childElement: Node | null = null
+      let childElement: Maybe<Node>
 
       if (isRenderResult(child)) {
         const [rootElement, mount] = child

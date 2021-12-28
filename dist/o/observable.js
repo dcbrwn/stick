@@ -1,15 +1,15 @@
 import { createTag } from '../util';
 export const [tagObservable, isObservable] = createTag();
-export function observable() {
+export const observable = () => {
     let observer;
     return [
         tagObservable((newObserver) => {
             if (observer)
-                throw new Error('No dice!');
+                throw new Error('Observable is already owned');
             observer = newObserver;
             return () => {
                 if (!observer) {
-                    throw new Error('You fool!');
+                    throw new Error('Observable is already forgotten');
                 }
                 observer = undefined;
             };
@@ -19,5 +19,5 @@ export function observable() {
                 observer(value);
         }
     ];
-}
+};
 //# sourceMappingURL=observable.js.map

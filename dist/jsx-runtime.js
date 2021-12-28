@@ -52,7 +52,7 @@ export const jsx = (tag, props) => {
     if (children) {
         const c = Array.isArray(children) && !isRenderResult(children) ? children : [children];
         for (const child of c) {
-            let childElement = null;
+            let childElement;
             if (isRenderResult(child)) {
                 const [rootElement, mount] = child;
                 childElement = rootElement;

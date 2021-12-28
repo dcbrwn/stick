@@ -6,6 +6,10 @@ export type Displayed = string | {
 
 export const stickKey = Symbol('Stick')
 
+export type Nothing = null | undefined | void
+
+export type Maybe<T> = T | Nothing
+
 export type StickOptions = {
     tagName?: string
     reflect?: Record<string, boolean>
@@ -17,8 +21,8 @@ export interface StickBuilder {
 }
 
 export type RenderResult = [
-  rootElement: Element | DocumentFragment | null,
-  mount: (() => () => void) | null
+  rootElement: Maybe<Element | DocumentFragment>,
+  mount: Maybe<() => () => void>
 ]
 
 export const [renderResult, isRenderResult] = tuple<RenderResult>()
