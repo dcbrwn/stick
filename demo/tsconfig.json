@@ -3,12 +3,12 @@
     "target": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react-jsx",
-    "jsxImportSource": "stick",
+    "jsxImportSource": "@stickts/stick",
     "lib": [
       "ESNext",
       "DOM",
       "DOM.Iterable"
     ],
-    "strict": true
+    "strict": true,
   }
 }

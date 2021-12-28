@@ -1,23 +1,38 @@
 {
-  "name": "stick-root",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@stickts/stick",
+  "version": "0.0.1",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "/dist/",
+    "/dist/o/"
+  ],
   "scripts": {
-    "demo": "npm run -w stick-demo watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "tsc --watch",
+    "build": "node ./scripts/build.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "shelljs": "^0.8.4",
+    "typescript": "^4.5.4"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dcbrwn/stick.git"
   },
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/dcbrwn/stick/issues"
   },
   "homepage": "https://github.com/dcbrwn/stick#readme",
-  "workspaces": [
-    "packages/stick",
-    "packages/stick-demo"
-  ]
+  "description": ""
 }
