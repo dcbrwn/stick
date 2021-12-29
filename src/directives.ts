@@ -48,8 +48,8 @@ export const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): 
   })
 }
 
-export const repeat = <ItemType, T extends ItemType[]> (
-  observe: O<T>,
+export const repeat = <ItemType> (
+  observe: O<ItemType[]>,
   renderer: (value: O<ItemType>) => RenderResult
 ): RenderResult => {
   type Item = {

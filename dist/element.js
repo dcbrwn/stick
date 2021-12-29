@@ -1,6 +1,6 @@
 import { stickKey } from './definitions';
 import { appendChild } from './dom';
-export function element(tagName, template, options = {}) {
+export const element = (tagName, template, options = {}) => {
     var _a, _b;
     const meta = {
         tagName,
@@ -32,5 +32,5 @@ export function element(tagName, template, options = {}) {
         _a = stickKey,
         _b));
     return Object.assign(template, { [stickKey]: meta });
-}
+};
 //# sourceMappingURL=element.js.map

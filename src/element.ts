@@ -1,11 +1,11 @@
-import { stickKey, StickOptions, Template, StickElement, AnyProps } from './definitions'
+import { stickKey, StickOptions, Template, StickElement, AnyProps, Maybe } from './definitions'
 import { appendChild } from './dom'
 
-export function element<Props extends AnyProps> (
+export const element = <Props extends AnyProps> (
   tagName: string,
   template: Template<Props>,
   options: StickOptions = {}
-): StickElement<Props> {
+): StickElement<Props> => {
   const meta = {
     tagName,
     reflect: options.reflect || {}
@@ -15,7 +15,7 @@ export function element<Props extends AnyProps> (
     public [stickKey] = meta
     public props!: Props
     public mount: (() => () => void) | boolean = false
-    public unmount: (() => void) | undefined
+    public unmount: Maybe<() => void>
 
     public connectedCallback () {
       if (!this.mount) {

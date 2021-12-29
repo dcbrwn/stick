@@ -8,6 +8,7 @@ export declare namespace JSX {
         children?: (string | O<any> | Renderer)[];
     }
     interface HTMLAttributes extends ElementProps {
+        class?: AttrValue<Displayed>;
         title?: AttrValue<Displayed>;
         style?: AttrValue<Displayed>;
         onClick?: EventHandler<MouseEvent>;

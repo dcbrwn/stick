@@ -27,6 +27,7 @@ export namespace JSX {
   interface HTMLAttributes extends ElementProps {
     // TODO: Steal proper typings from preact:
     // https://github.com/preactjs/preact/blob/9d761c56bafc77be48780885391dd6f72ba23359/src/jsx.d.ts#L622
+    class?: AttrValue<Displayed>
     title?: AttrValue<Displayed>
     style?: AttrValue<Displayed>
 

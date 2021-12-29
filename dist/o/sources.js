@@ -14,21 +14,30 @@ export function fromEvent(target, eventType, options = {}) {
         return on(target, eventType, listener, options);
     });
 }
-export function broadcast(input) {
+export const broadcast = (input) => {
     const observers = new Set();
     let forget;
+    let lastValue;
     return tagObservable((notify) => {
         if (observers.size === 0) {
-            forget = input((value) => observers.forEach((notify) => notify(value)));
+            forget = input((value) => {
+                lastValue = value;
+                observers.forEach((notify) => notify(value));
+            });
         }
         observers.add(notify);
+        // TODO: `lastValue` may be intentionally undefined
+        if (lastValue) {
+            console.log('greetings!');
+            notify(lastValue);
+        }
         return () => {
             observers.delete(notify);
             if (observers.size === 0)
                 forget();
         };
     });
-}
+};
 export function merge(...inputs) {
     return tagObservable((notify) => {
         const forgetFns = inputs.map((observe) => observe(notify));

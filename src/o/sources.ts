@@ -1,3 +1,4 @@
+import { Maybe } from '../definitions'
 import { on } from '../dom'
 import { O, Observer, tagObservable } from './observable'
 
@@ -21,16 +22,26 @@ export function fromEvent<E extends Event> (
   })
 }
 
-export function broadcast<T> (input: O<T>): O<T> {
+export const broadcast = <T> (input: O<T>): O<T> => {
   const observers = new Set<Observer<T>>()
-  let forget: VoidFunction | undefined
+  let forget: Maybe<VoidFunction>
+  let lastValue: Maybe<T>
 
   return tagObservable((notify) => {
     if (observers.size === 0) {
-      forget = input((value) => observers.forEach((notify) => notify(value)))
+      forget = input((value) => {
+        lastValue = value
+        observers.forEach((notify) => notify(value))
+      })
     }
 
     observers.add(notify)
+
+    // TODO: `lastValue` may be intentionally undefined
+    if (lastValue) {
+      console.log('greetings!')
+      notify(lastValue!)
+    }
 
     return () => {
       observers.delete(notify)

@@ -5,12 +5,11 @@ export const observable = () => {
     return [
         tagObservable((newObserver) => {
             if (observer)
-                throw new Error('Observable is already owned');
+                throw new Error('Already observed');
             observer = newObserver;
             return () => {
-                if (!observer) {
-                    throw new Error('Observable is already forgotten');
-                }
+                if (!observer)
+                    throw new Error('Already forgotten');
                 observer = undefined;
             };
         }),

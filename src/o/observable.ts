@@ -11,14 +11,12 @@ export const observable = <T> (): [O<T>, (value: T) => void] => {
 
   return [
     tagObservable((newObserver: Observer<T>): (() => void) => {
-      if (observer) throw new Error('Observable is already owned')
+      if (observer) throw new Error('Already observed')
 
       observer = newObserver
 
       return () => {
-        if (!observer) {
-          throw new Error('Observable is already forgotten')
-        }
+        if (!observer) throw new Error('Already forgotten')
 
         observer = undefined
       }
