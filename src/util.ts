@@ -5,7 +5,7 @@ type Tag<Constraint extends object> = [
   isTagged: (obj: unknown) => obj is Constraint
 ]
 
-export function createTag<Constraint extends object = object> (description?: string): Tag<Constraint> {
+export const createTag = <Constraint extends object = object> (description?: string): Tag<Constraint> => {
   const tags = new WeakSet<Constraint>()
 
   return [
@@ -24,7 +24,7 @@ type Tuple<Constraint extends unknown[]> = [
   isInstance: (obj: unknown) => obj is Constraint
 ]
 
-export function tuple<Constraint extends unknown[]> (description?: string): Tuple<Constraint> {
+export const tuple = <Constraint extends unknown[]> (description?: string): Tuple<Constraint> => {
   const [tag, isTagged] = createTag<Constraint>(description)
 
   return [
@@ -36,12 +36,12 @@ export function tuple<Constraint extends unknown[]> (description?: string): Tupl
   ]
 }
 
-export function toString (value: Displayed): string {
+export const toString = (value: Displayed): string => {
   return typeof value === 'string' ? value : value.toString()
 }
 
 const re = /([a-z0-9])([A-Z])/g
-export function camelToKebab (value: string): string {
+export const camelToKebab = (value: string): string => {
   return value[0].toLowerCase() + value.slice(1).replace(re, (match, tail, head) => `${tail}-${head.toLowerCase()}`)
 }
 
