@@ -12,7 +12,7 @@ import {
 } from './definitions'
 import { createElement, on, setAttr, createTextNode, createFragment } from './dom'
 import { EventSource, isEventSource } from './eventSource'
-import { isObservable, O } from './o'
+import { isObservable, O, broadcast, isBroadcast } from './o'
 import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
@@ -64,12 +64,18 @@ const bindProp = (
   }
 
   if (meta) {
+    let propValue = value
+
+    if (isObservable(propValue)) {
+      propValue = isBroadcast(value) ? value : broadcast(value as O<unknown>)
+    }
+
     // @ts-expect-error
     if (!element.props) element.props = {}
     // @ts-expect-error
     // We don't know what element we actually dealing with here
     // All the typechecking will happen in the template
-    element.props[key] = value
+    element.props[key] = propValue
   }
 
   return mount

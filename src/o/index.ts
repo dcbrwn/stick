@@ -8,6 +8,7 @@ export {
   fromArray,
   fromEvent,
   broadcast,
+  isBroadcast,
   merge
 } from './sources'
 
