@@ -40,11 +40,12 @@ export const throttleToFrame = <T> (input: O<T>): O<T> => {
   })
 }
 
-export const map = <T, R> (fn: (value: T) => R) => (input: O<T>): O<R> => {
-  return tagObservable((notify) => {
-    return input((value) => notify(fn(value)))
-  })
-}
+export const map = <From, To> (fn: (value: From) => To) =>
+  (input: O<From>): O<To> => {
+    return tagObservable((notify) => {
+      return input((value) => notify(fn(value)))
+    })
+  }
 
 export const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
   (input: O<Value>): O<Memo> => {
@@ -56,10 +57,11 @@ export const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init:
     })
   }
 
-export const filter = <T> (fn: (value: T) => boolean) => (input: O<T>): O<T> => {
-  return tagObservable((notify) => {
-    return input((value) => {
-      if (fn(value)) notify(value)
+export const filter = <T> (fn: (value: T) => boolean) =>
+  (input: O<T>): O<T> => {
+    return tagObservable((notify) => {
+      return input((value) => {
+        if (fn(value)) notify(value)
+      })
     })
-  })
-}
+  }

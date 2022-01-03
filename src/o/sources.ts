@@ -1,6 +1,6 @@
 import { Maybe } from '../definitions'
 import { on } from '../dom'
-import { createTag, noop } from '../util'
+import { createTag } from '../util'
 import { O, Observer, tagObservable } from './observable'
 
 export const fromArray = <T> (items: T[]): O<T> => {

@@ -6,6 +6,8 @@ type Tag<Constraint extends object> = [
 ]
 
 export const createTag = <Constraint extends object = object> (description?: string): Tag<Constraint> => {
+  // Using set to store tags, is not the most efficient solution,
+  // but it works for immutable objects and non-invasive
   const tags = new WeakSet<Constraint>()
 
   return [
