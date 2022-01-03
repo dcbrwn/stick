@@ -1,5 +1,6 @@
 import { Maybe } from '../definitions'
 import { on } from '../dom'
+import { createTag, noop } from '../util'
 import { O, Observer, tagObservable } from './observable'
 
 export const fromArray = <T> (items: T[]): O<T> => {
@@ -22,24 +23,32 @@ export const fromEvent = <E extends Event> (
   })
 }
 
+export const [tagBroadcast, isBroadcast] = createTag<O<unknown>>()
+
 export const broadcast = <T> (input: O<T>): O<T> => {
   const observers = new Set<Observer<T>>()
   let forget: Maybe<VoidFunction>
   let lastValue: Maybe<T>
 
-  return tagObservable((notify) => {
+  const notifyAll = (value: T) => {
+    lastValue = value
+
+    // Manually iterating over the observers collection on V8 9.4
+    // is roughly two times faster than using forEach with lambda
+    const iterator = observers.values()
+    let notify: Maybe<IteratorResult<Observer<T>, undefined>>
+    while (!(notify = iterator.next()).done) notify.value(value)
+  }
+
+  return tagBroadcast(tagObservable((notify) => {
     if (observers.size === 0) {
-      forget = input((value) => {
-        lastValue = value
-        observers.forEach((notify) => notify(value))
-      })
+      forget = input(notifyAll)
     }
 
     observers.add(notify)
 
     // TODO: `lastValue` may be intentionally undefined
     if (lastValue) {
-      console.log('greetings!')
       notify(lastValue!)
     }
 
@@ -48,7 +57,7 @@ export const broadcast = <T> (input: O<T>): O<T> => {
 
       if (observers.size === 0) forget!()
     }
-  })
+  }))
 }
 
 type UnifyO<T extends unknown[]> = T extends [O<infer R>, ...(infer Rest)]
