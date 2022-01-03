@@ -2,7 +2,7 @@ import { Maybe } from '../definitions'
 import { on } from '../dom'
 import { O, Observer, tagObservable } from './observable'
 
-export function fromArray<T> (items: T[]): O<T> {
+export const fromArray = <T> (items: T[]): O<T> => {
   return tagObservable<O<T>>((notify: Observer<T>) => {
     // eslint-disable-next-line prefer-const
     for (let i = 0, len = items.length; i < len; i += 1) notify(items[i])
@@ -10,11 +10,11 @@ export function fromArray<T> (items: T[]): O<T> {
   })
 }
 
-export function fromEvent<E extends Event> (
+export const fromEvent = <E extends Event> (
   target: EventTarget,
   eventType: E['type'],
   options: EventListenerOptions = {}
-): O<E> {
+): O<E> => {
   return tagObservable((notify) => {
     const listener = notify as Observer<Event>
 
@@ -55,7 +55,7 @@ type UnifyO<T extends unknown[]> = T extends [O<infer R>, ...(infer Rest)]
   ? R | UnifyO<Rest>
   : never
 
-export function merge<T extends O<unknown>[]> (...inputs: T): O<UnifyO<T>> {
+export const merge = <T extends O<unknown>[]> (...inputs: T): O<UnifyO<T>> => {
   return tagObservable((notify) => {
     const forgetFns = inputs.map((observe) => observe(notify as Observer<unknown>))
     return () => forgetFns.forEach(forget => forget())

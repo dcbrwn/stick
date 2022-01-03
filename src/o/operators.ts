@@ -2,17 +2,17 @@ import { O, tagObservable } from './observable'
 
 export type Operator<In, Out> = (input: O<In>) => O<Out>
 
-export function throttleToFrame<T> (input: O<T>): O<T> {
+export const throttleToFrame = <T> (input: O<T>): O<T> => {
   const nextFrameTasks: VoidFunction[] = []
 
-  function handleTasks () {
+  const handleTasks = () => {
     for (let i = 0, len = nextFrameTasks.length; i < len; i += 1) {
       nextFrameTasks[i]()
     }
     nextFrameTasks.length = 0
   }
 
-  function addTask (task: VoidFunction) {
+  const addTask = (task: VoidFunction) => {
     if (nextFrameTasks.length === 0) {
       requestAnimationFrame(handleTasks)
     }
@@ -24,7 +24,7 @@ export function throttleToFrame<T> (input: O<T>): O<T> {
     let nextValue: T | undefined
     let isScheduled = false
 
-    function handleNextFrame () {
+    const handleNextFrame = () => {
       isScheduled = false
       notify(nextValue!)
     }
