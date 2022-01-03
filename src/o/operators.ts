@@ -1,8 +1,8 @@
 import { O, tagObservable } from './observable'
 
-export type Operator<In, Out> = (input: O<In>) => O<Out>
+type Operator<In, Out> = (input: O<In>) => O<Out>
 
-export const throttleToFrame = <T> (input: O<T>): O<T> => {
+const throttleToFrame = <T> (input: O<T>): O<T> => {
   const nextFrameTasks: VoidFunction[] = []
 
   const handleTasks = () => {
@@ -40,14 +40,14 @@ export const throttleToFrame = <T> (input: O<T>): O<T> => {
   })
 }
 
-export const map = <From, To> (fn: (value: From) => To) =>
+const map = <From, To> (fn: (value: From) => To) =>
   (input: O<From>): O<To> => {
     return tagObservable((notify) => {
       return input((value) => notify(fn(value)))
     })
   }
 
-export const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
+const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
   (input: O<Value>): O<Memo> => {
     return tagObservable((notify) => {
       let memo = init
@@ -57,7 +57,7 @@ export const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init:
     })
   }
 
-export const filter = <T> (fn: (value: T) => boolean) =>
+const filter = <T> (fn: (value: T) => boolean) =>
   (input: O<T>): O<T> => {
     return tagObservable((notify) => {
       return input((value) => {
@@ -65,3 +65,11 @@ export const filter = <T> (fn: (value: T) => boolean) =>
       })
     })
   }
+
+export {
+  type Operator,
+  throttleToFrame,
+  map,
+  scan,
+  filter
+}

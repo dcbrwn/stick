@@ -2,15 +2,17 @@ import { O } from './o'
 import { observable } from './o/observable'
 import { createTag } from './util'
 
-export type EventSource<E extends Event, Mapped = unknown> = O<Mapped> & {
+type EventSource<E extends Event, Mapped = unknown> = O<Mapped> & {
   dispatchEvent(event: E): boolean | undefined | void;
 }
 
-export const [tagEventSource, isEventSource] = createTag<EventSource<Event>>()
+const [tagEventSource, isEventSource] = createTag<EventSource<Event>>()
 
-export function eventSource<E extends Event> (): EventSource<E, E>
-export function eventSource<E extends Event, R> (map: (event: E) => R): EventSource<E, R>
-export function eventSource<E extends Event, R> (map?: (event: E) => R): EventSource<E, R> {
+function eventSource<E extends Event> (): EventSource<E, E>
+function eventSource<E extends Event, R> (map: (event: E) => R): EventSource<E, R>
+// Typescript only allows to overload functions
+// eslint-disable-next-line func-style
+function eventSource<E extends Event, R> (map?: (event: E) => R): EventSource<E, R> {
   const [observe, next] = observable<R>()
   const eventSource = observe as EventSource<Event, R>
   eventSource.dispatchEvent = map
@@ -18,4 +20,11 @@ export function eventSource<E extends Event, R> (map?: (event: E) => R): EventSo
     // Without the `map` function, `next` by itself is equivalent to `dispatchEvent`
     : next as unknown as ((event: E) => void)
   return tagEventSource(eventSource)
+}
+
+export {
+  type EventSource,
+  tagEventSource,
+  eventSource,
+  isEventSource
 }

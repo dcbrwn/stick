@@ -16,7 +16,7 @@ const ensureElement = (element: Maybe<DocumentFragment | Element>): Element => {
   return result
 }
 
-export const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult => {
+const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult => {
   const cache = new Map<T, [Element, Maybe<() => () => void>]>()
   let unmount: VoidFunction | Nothing
   let currentElement: Element = createContainer()
@@ -48,7 +48,7 @@ export const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): 
   })
 }
 
-export const repeat = <ItemType> (
+const repeat = <ItemType> (
   observe: O<ItemType[]>,
   renderer: (value: O<ItemType>) => RenderResult
 ): RenderResult => {
@@ -107,4 +107,9 @@ export const repeat = <ItemType> (
       forget()
     }
   })
+}
+
+export {
+  match,
+  repeat
 }

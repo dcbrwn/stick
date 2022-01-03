@@ -1,40 +1,58 @@
 import { tuple } from './util'
 
-export type Displayed = string | {
+type Displayed = string | {
   toString(): string;
 }
 
-export const stickKey = Symbol('Stick')
+const stickKey = Symbol('Stick')
 
-export type Nothing = null | undefined | void
+type Nothing = null | undefined | void
 
-export type Maybe<T> = T | Nothing
+type Maybe<T> = T | Nothing
 
-export type StickOptions = {
+type StickOptions = {
     tagName?: string
     reflect?: Record<string, boolean>
 }
 
-export interface StickBuilder {
+interface StickBuilder {
     tagName: string;
     reflect: Record<string, boolean>
 }
 
-export type RenderResult = [
+type RenderResult = [
   rootElement: Maybe<Element | DocumentFragment>,
   mount: Maybe<() => () => void>
 ]
 
-export const [renderResult, isRenderResult] = tuple<RenderResult>()
+const [renderResult, isRenderResult] = tuple<RenderResult>()
 
-export type AnyProps = { [key: string]: any }
+type AnyProps = { [key: string]: any }
 
-export type Template<Props extends AnyProps> = (props: Props) => RenderResult
+type Template<Props extends AnyProps> = (props: Props) => RenderResult
 
-export type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickBuilder }
+type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickBuilder }
 
-export const Fragment = Symbol('Fragment')
+const Fragment = Symbol('Fragment')
 
-export type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickElement<AnyProps>
+type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickElement<AnyProps>
 
-export type Renderer = (tag: Renderable, props: AnyProps) => RenderResult
+type Renderer = (tag: Renderable, props: AnyProps) => RenderResult
+
+export {
+  type Displayed,
+  type Nothing,
+  type Maybe,
+  type StickOptions,
+  type StickBuilder,
+  type RenderResult,
+  type AnyProps,
+  type Template,
+  type StickElement,
+  type Renderable,
+  type Renderer,
+  Fragment,
+  stickKey,
+  renderResult,
+  isRenderResult
+}

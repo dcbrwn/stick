@@ -1,12 +1,12 @@
 import { createTag } from '../util'
 
-export type Observer<T> = (value: T) => void
+type Observer<T> = (value: T) => void
 
-export type O<T> = (observer: Observer<T>) => (() => void)
+type O<T> = (observer: Observer<T>) => (() => void)
 
-export const [tagObservable, isObservable] = createTag<O<unknown>>()
+const [tagObservable, isObservable] = createTag<O<unknown>>()
 
-export const observable = <T> (): [O<T>, (value: T) => void] => {
+const observable = <T> (): [O<T>, (value: T) => void] => {
   let observer: Observer<T> | undefined
 
   return [
@@ -25,4 +25,12 @@ export const observable = <T> (): [O<T>, (value: T) => void] => {
       if (observer) observer(value)
     }
   ]
+}
+
+export {
+  type Observer,
+  type O,
+  observable,
+  tagObservable,
+  isObservable
 }

@@ -1,7 +1,7 @@
 import { stickKey, StickOptions, Template, StickElement, AnyProps, Maybe } from './definitions'
 import { appendChild } from './dom'
 
-export const element = <Props extends AnyProps> (
+const element = <Props extends AnyProps> (
   tagName: string,
   template: Template<Props>,
   options: StickOptions = {}
@@ -36,4 +36,8 @@ export const element = <Props extends AnyProps> (
   })
 
   return Object.assign(template, { [stickKey]: meta })
+}
+
+export {
+  element
 }

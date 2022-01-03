@@ -5,7 +5,7 @@ type Tag<Constraint extends object> = [
   isTagged: (obj: unknown) => obj is Constraint
 ]
 
-export const createTag = <Constraint extends object = object> (description?: string): Tag<Constraint> => {
+const createTag = <Constraint extends object = object> (description?: string): Tag<Constraint> => {
   // Using set to store tags, is not the most efficient solution,
   // but it works for immutable objects and non-invasive
   const tags = new WeakSet<Constraint>()
@@ -26,7 +26,7 @@ type Tuple<Constraint extends unknown[]> = [
   isInstance: (obj: unknown) => obj is Constraint
 ]
 
-export const tuple = <Constraint extends unknown[]> (description?: string): Tuple<Constraint> => {
+const tuple = <Constraint extends unknown[]> (description?: string): Tuple<Constraint> => {
   const [tag, isTagged] = createTag<Constraint>(description)
 
   return [
@@ -38,15 +38,24 @@ export const tuple = <Constraint extends unknown[]> (description?: string): Tupl
   ]
 }
 
-export const toString = (value: Displayed): string => {
+const toString = (value: Displayed): string => {
   return typeof value === 'string' ? value : value.toString()
 }
 
 const re = /([a-z0-9])([A-Z])/g
-export const camelToKebab = (value: string): string => {
+const camelToKebab = (value: string): string => {
   return value[0].toLowerCase() + value.slice(1).replace(re, (match, tail, head) => `${tail}-${head.toLowerCase()}`)
 }
 
-export const noop = (...args: unknown[]): void => {}
+const noop = (...args: unknown[]): void => {}
 
-export const identity = <T>(input: T): T => input
+const identity = <T>(input: T): T => input
+
+export {
+  createTag,
+  tuple,
+  toString,
+  camelToKebab,
+  noop,
+  identity
+}

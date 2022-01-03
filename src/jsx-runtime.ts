@@ -19,7 +19,7 @@ type AttrValue<T> = T | O<T>
 
 type EventHandler<E extends Event> = ((event: E) => boolean | undefined | void) | EventSource<E>
 
-export namespace JSX {
+namespace JSX {
   interface ElementProps {
     children?: (string | O<any> | Renderer)[]
   }
@@ -86,7 +86,7 @@ const createRoot = (tag: Renderable): DocumentFragment | HTMLElement => {
   return createElement(typeof tag === 'string' ? tag : tag[stickKey].tagName)
 }
 
-export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
+const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
   const element = createRoot(tag)
   const { children, ...properties } = props
   const mountFns: (() => () => void)[] = []
@@ -133,6 +133,11 @@ export const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
   })
 }
 
-export const jsxs = jsx
+const jsxs = jsx
 
-export { Fragment }
+export {
+  type JSX,
+  jsx,
+  jsxs,
+  Fragment
+}

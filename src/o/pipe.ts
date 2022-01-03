@@ -36,6 +36,8 @@ function pipe<In, A, B, C, D, Out>(
     Operator<D, Out>,
   ]
 ): O<Out>
+// Typescript only allows to overload functions
+// eslint-disable-next-line func-style
 function pipe (input: O<any>, ...ops: Operator<any, any>[]): O<unknown> {
   const len = ops.length
   let result = input
