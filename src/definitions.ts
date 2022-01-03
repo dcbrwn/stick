@@ -29,7 +29,7 @@ const [renderResult, isRenderResult] = tuple<RenderResult>()
 
 type AnyProps = { [key: string]: any }
 
-type Template<Props extends AnyProps> = (props: Props) => RenderResult
+type Template<Props extends AnyProps> = (props: Props, element: HTMLElement) => RenderResult
 
 type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickBuilder }
 

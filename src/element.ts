@@ -19,7 +19,7 @@ const element = <Props extends AnyProps> (
 
     public connectedCallback () {
       if (!this.mount) {
-        const [content, mount] = template(this.props)
+        const [content, mount] = template(this.props, this)
         this.mount = mount || true
         if (content) appendChild(this, content)
       }
