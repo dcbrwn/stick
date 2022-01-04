@@ -1,4 +1,4 @@
-import { element, eventSource } from '@stickts/stick'
+import { element, inlet } from '@stickts/stick'
 import { match } from '@stickts/stick/directives'
 import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe, broadcast } from '@stickts/stick/o'
 
@@ -41,11 +41,15 @@ const TestElement = element('x-update-perf', (props: { cols: number, rows: numbe
 })
 
 const Counter = element('x-counter', (props: { init: number }) => {
-  const inc$ = eventSource(() => 1)
-  const dec$ = eventSource(() => -1)
+  const inc$ = inlet<MouseEvent>()
+  const dec$ = inlet<MouseEvent>()
 
   const count = pipe(
-    merge(fromArray([0]), inc$, dec$),
+    merge(
+      fromArray([0]),
+      map(1)(inc$),
+      map(-1)(dec$)
+    ),
     scan((counter, change) => counter + change, props.init),
     broadcast
   )
