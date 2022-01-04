@@ -1,3 +1,10 @@
+/**
+ * Build process is so weird only because of this issue:
+ * https://github.com/microsoft/TypeScript/issues/33079
+ *
+ * When it's solved, simple npm scripts can be safely used
+ **/
+
 import { URL } from 'url'
 import fs from 'fs'
 import shell from 'shelljs'
@@ -18,6 +25,7 @@ const relative = (path) => new URL(path, import.meta.url)
 
   const parsedPack = JSON.parse(fs.readFileSync(pack, { encoding: 'utf-8' }))
 
+  parsedPack.type = 'module'
   parsedPack.files = fs.readdirSync(dist)
   delete parsedPack.devDependencies
 

@@ -1,0 +1,12 @@
+{
+  "extension": ["ts"],
+  "spec": "src/**/*.spec.ts",
+  "file": [
+    "src",
+    "src/o",
+    "src/directives"
+  ],
+  "require": [
+    "ts-node/register"
+  ]
+}
