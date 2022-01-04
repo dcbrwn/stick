@@ -1,5 +1,8 @@
 # Stick
 
+[![CircleCI](https://circleci.com/gh/dcbrwn/stick/tree/dev.svg?style=svg)](https://circleci.com/gh/dcbrwn/stick/tree/dev)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/test_coverage)](https://codeclimate.com/github/dcbrwn/stick/test_coverage)
+
 This is a POC implementation of a rendering library with following goals:
 - Simple API with as few layers of indirection as possible. One should easily be able to grasp how the thing works
 - Fine-grained DOM updates, without intermediate layers like VirtualDOM
