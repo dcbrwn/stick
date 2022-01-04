@@ -8,7 +8,9 @@
     "watch": "tsc --watch",
     "build": "node ./scripts/build.js",
     "test": "mocha",
-    "coverage": "nyc --all --include=src/**/*.ts --exclude=**/*.spec.ts npm run test"
+    "coverage": "nyc --all --include=src/**/*.ts --exclude=**/*.spec.ts npm run test",
+    "ci:test": "mocha",
+    "ci:coverage": "nyc --all --include=src/**/*.ts --exclude=**/*.spec.ts --reporter=lcov npm run test"
   },
   "author": "",
   "license": "ISC",
