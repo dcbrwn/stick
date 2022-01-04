@@ -1,13 +1,15 @@
-import { Maybe, Nothing, renderResult, RenderResult } from './definitions'
+import { onMount, getMount, withRenderingContext } from './context'
+import { Maybe, Nothing, RenderResult } from './definitions'
 import { createContainer } from './dom'
 import { O, observable } from './o'
 
-const ensureElement = (element: Maybe<DocumentFragment | Element>): Element => {
-  let result
+const ensureElement = (element: Maybe<DocumentFragment | Element>): HTMLElement => {
+  let result: Maybe<HTMLElement>
+
   if (element instanceof DocumentFragment) {
     result = createContainer()
     result.appendChild(element)
-  } else if (element instanceof Element) {
+  } else if (element instanceof HTMLElement) {
     result = element
   } else {
     result = createContainer()
@@ -17,23 +19,25 @@ const ensureElement = (element: Maybe<DocumentFragment | Element>): Element => {
 }
 
 const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult => {
-  const cache = new Map<T, [Element, Maybe<() => () => void>]>()
+  const cache = new Map<T, [HTMLElement, Maybe<() => () => void>]>()
   let unmount: VoidFunction | Nothing
-  let currentElement: Element = createContainer()
+  let currentElement: HTMLElement = createContainer()
 
-  return renderResult(currentElement, () => {
+  onMount(() => {
     const forget = observe((value) => {
       if (unmount) unmount()
 
       let next = cache.get(value)
 
       if (!next) {
-        const [rootElement, mount] = renderer(value)
-        next = [ensureElement(rootElement), mount]
-        cache.set(value, next)
+        withRenderingContext(() => {
+          const rootElement = renderer(value)
+          next = [ensureElement(rootElement), getMount()]
+          cache.set(value, next)
+        })
       }
 
-      const [element, mount] = next
+      const [element, mount] = next!
 
       currentElement.replaceWith(element!)
       currentElement = element!
@@ -46,6 +50,8 @@ const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderR
       forget()
     }
   })
+
+  return currentElement
 }
 
 const repeat = <ItemType> (
@@ -62,7 +68,7 @@ const repeat = <ItemType> (
   const items: Item[] = []
   let visibleItems = 0
 
-  return renderResult(container, () => {
+  onMount(() => {
     const forget = observe((collection) => {
       const newLength = collection.length
       const difference = newLength - visibleItems
@@ -80,9 +86,11 @@ const repeat = <ItemType> (
 
         if (itemsToCreate > 0) {
           for (let i = 0; i < itemsToCreate; i += 1) {
-            const [observe, notify] = observable<ItemType>()
-            const [element, mount] = renderer(observe)
-            items.push({ element: ensureElement(element), notify, mount })
+            withRenderingContext(() => {
+              const [observe, notify] = observable<ItemType>()
+              const element = renderer(observe)
+              items.push({ element: ensureElement(element), notify, mount: getMount() })
+            })
           }
         }
 
@@ -107,6 +115,8 @@ const repeat = <ItemType> (
       forget()
     }
   })
+
+  return container
 }
 
 export {

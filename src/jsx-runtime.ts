@@ -1,23 +1,22 @@
+import { onMount, observe } from './context'
 import {
   Renderable,
   Renderer,
   stickKey,
-  isRenderResult,
-  renderResult,
   AnyProps,
   Displayed,
   Fragment,
   StickBuilder,
   Maybe
 } from './definitions'
-import { createElement, on, setAttr, createTextNode, createFragment } from './dom'
-import { EventSource, isEventSource } from './eventSource'
+import { createElement, on, setAttr, createTextNode, createFragment, appendChild } from './dom'
+import { Inlet, isInlet } from './inlet'
 import { isObservable, O, broadcast, isBroadcast } from './o'
 import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
 
-type EventHandler<E extends Event> = ((event: E) => boolean | undefined | void) | EventSource<E>
+type EventHandler<E extends Event> = ((event: E) => void) | Inlet<E>
 
 namespace JSX {
   interface ElementProps {
@@ -43,7 +42,7 @@ const eventHandlerKey = /^on[A-Z]/
 
 const bindEventHandler = (element: Element, key: string, handler: EventHandler<Event>) => {
   const eventType = camelToKebab(key.slice(2))
-  return () => on(element, eventType, isEventSource(handler) ? handler.dispatchEvent : handler)
+  return () => on(element, eventType, isInlet(handler) ? handler.notify : handler)
 }
 
 const bindProp = (
@@ -51,13 +50,12 @@ const bindProp = (
   key: string,
   value: unknown,
   meta?: StickBuilder
-) => {
+): void => {
   const needsReflect = !meta || key in meta.reflect
-  let mount
 
   if (needsReflect) {
     if (isObservable(value)) {
-      mount = () => value((nextValue) => setAttr(element, key, nextValue as Displayed))
+      observe(value, (nextValue) => setAttr(element, key, nextValue as Displayed))
     } else {
       setAttr(element, key, value as Displayed)
     }
@@ -77,60 +75,50 @@ const bindProp = (
     // All the typechecking will happen in the template
     element.props[key] = propValue
   }
-
-  return mount
 }
 
-const createRoot = (tag: Renderable): DocumentFragment | HTMLElement => {
+const createElementFromTag = (tag: Renderable): DocumentFragment | HTMLElement => {
   if (tag === Fragment) return createFragment()
   return createElement(typeof tag === 'string' ? tag : tag[stickKey].tagName)
 }
 
 const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
-  const element = createRoot(tag)
+  const element = createElementFromTag(tag)
   const { children, ...properties } = props
-  const mountFns: (() => () => void)[] = []
 
   for (const [key, value] of Object.entries(properties)) {
     if (key.startsWith('_')) continue
     else if (eventHandlerKey.test(key)) {
-      mountFns.push(bindEventHandler(element as HTMLElement, key, value))
+      onMount(bindEventHandler(element as HTMLElement, key, value))
     } else {
       bindProp(element as HTMLElement, key, value, Reflect.get(element, stickKey))
     }
   }
 
   if (children) {
-    const c = Array.isArray(children) && !isRenderResult(children) ? children : [children]
+    const c = Array.isArray(children) ? children : [children]
 
     for (const child of c) {
       let childElement: Maybe<Node>
 
-      if (isRenderResult(child)) {
-        const [rootElement, mount] = child
-        childElement = rootElement
-        if (mount) mountFns.push(mount)
+      if (child instanceof HTMLElement) {
+        childElement = child
       } else if (isObservable(child)) {
-        const textNode = createTextNode('')
-        mountFns.push(() => child((value) => {
+        const textNode = childElement = createTextNode('')
+        observe(child, (value) => {
           textNode.data = toString(value as Displayed)
-        }))
-        childElement = textNode
+        })
       } else {
         childElement = createTextNode(toString(child))
       }
 
       if (childElement) {
-        element.append(childElement)
+        appendChild(element, childElement)
       }
     }
   }
 
-  return renderResult(element, () => {
-    const unmountFns = mountFns.map((init) => init())
-
-    return () => unmountFns.forEach((unmount) => unmount())
-  })
+  return element
 }
 
 const jsxs = jsx

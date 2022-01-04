@@ -1,3 +1,4 @@
+import { getMount, withRenderingContext } from './context'
 import { stickKey, StickOptions, Template, StickElement, AnyProps, Maybe } from './definitions'
 import { appendChild } from './dom'
 
@@ -14,14 +15,16 @@ const element = <Props extends AnyProps> (
   customElements.define(tagName, class extends HTMLElement {
     public [stickKey] = meta
     public props!: Props
-    public mount: (() => () => void) | boolean = false
+    public mount: Maybe<() => () => void>
     public unmount: Maybe<() => void>
 
     public connectedCallback () {
       if (!this.mount) {
-        const [content, mount] = template(this.props, this)
-        this.mount = mount || true
-        if (content) appendChild(this, content)
+        withRenderingContext(() => {
+          const content = template(this.props, this)
+          this.mount = getMount()
+          if (content) appendChild(this, content)
+        })
       }
 
       if (typeof this.mount === 'function') this.unmount = this.mount()

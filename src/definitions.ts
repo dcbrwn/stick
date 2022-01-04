@@ -1,5 +1,3 @@
-import { tuple } from './util'
-
 type Displayed = string | {
   toString(): string;
 }
@@ -20,12 +18,7 @@ interface StickBuilder {
     reflect: Record<string, boolean>
 }
 
-type RenderResult = [
-  rootElement: Maybe<Element | DocumentFragment>,
-  mount: Maybe<() => () => void>
-]
-
-const [renderResult, isRenderResult] = tuple<RenderResult>()
+type RenderResult = HTMLElement | DocumentFragment
 
 type AnyProps = { [key: string]: any }
 
@@ -52,7 +45,5 @@ export {
   type Renderable,
   type Renderer,
   Fragment,
-  stickKey,
-  renderResult,
-  isRenderResult
+  stickKey
 }

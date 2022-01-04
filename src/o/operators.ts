@@ -40,9 +40,11 @@ const throttleToFrame = <T> (input: O<T>): O<T> => {
   })
 }
 
-const map = <From, To> (fn: (value: From) => To) =>
+const map = <From, To> (fnOrValue: ((value: From) => To) | To) =>
   (input: O<From>): O<To> => tagObservable((notify) => {
-    return input((value) => notify(fn(value)))
+    return typeof fnOrValue === 'function'
+      ? input((value) => notify((fnOrValue as (value: From) => To)(value)))
+      : input(() => notify(fnOrValue))
   })
 
 const tap = <T> (fn: (value: T) => void) =>
