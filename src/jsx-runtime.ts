@@ -10,8 +10,8 @@ import {
   Maybe
 } from './definitions'
 import { createElement, on, setAttr, createTextNode, createFragment, appendChild } from './dom'
-import { Inlet, isInlet } from './inlet'
-import { isObservable, O, broadcast, isBroadcast } from './o'
+import { Inlet, intoInlet, isInlet } from './inlet'
+import { isObservable, O, broadcast, isBroadcast, fromEvent } from './o'
 import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
@@ -42,7 +42,12 @@ const eventHandlerKey = /^on[A-Z]/
 
 const bindEventHandler = (element: Element, key: string, handler: EventHandler<Event>) => {
   const eventType = camelToKebab(key.slice(2))
-  return () => on(element, eventType, isInlet(handler) ? handler.notify : handler)
+
+  if (isInlet(handler)) {
+    intoInlet(fromEvent(element, eventType), handler)
+  } else {
+    onMount(() => on(element, eventType, handler as (event: Event) => void))
+  }
 }
 
 const bindProp = (
@@ -64,7 +69,7 @@ const bindProp = (
   if (meta) {
     let propValue = value
 
-    if (isObservable(propValue)) {
+    if (isObservable(propValue) && !isInlet(value)) {
       propValue = isBroadcast(value) ? value : broadcast(value as O<unknown>)
     }
 
@@ -89,7 +94,7 @@ const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
   for (const [key, value] of Object.entries(properties)) {
     if (key.startsWith('_')) continue
     else if (eventHandlerKey.test(key)) {
-      onMount(bindEventHandler(element as HTMLElement, key, value))
+      bindEventHandler(element as HTMLElement, key, value)
     } else {
       bindProp(element as HTMLElement, key, value, Reflect.get(element, stickKey))
     }

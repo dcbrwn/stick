@@ -9,35 +9,37 @@ This is a POC implementation of a rendering library with following goals:
 ## Example
 
 ```tsx
-import { element } from 'stick'
-import { O, fromEvent, map } from 'stick/o'
-
+import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
+import { O, fromEvent, map } from '@stickts/stick/o'
 
 // element() creates a WebComponent, custom HTML tag, that can be used as a regular HTML element.
-const CoordsViewer = element('x-coords', (props: { coords: O<[number, number]> }) => {
+const Counter = element<{
+  init: number,
+  count$: Inlet<number>
+}>('x-counter', (props) => {
   // This function is called only once, when element is constructed.
 
-  // Decompose the observable with coordinates
-  const x = map(props.coords, v => v[0])
-  const y = map(props.coords, v => v[1])
-
-  // Render the DOM. JSX here actually renders DOM nodes and remembers places, that need dynamic updates.
-  return <span>({x}, {y})</span>
-})
-
-
-const Counter = element('x-counter', (props: { init: number }) => {
-  // Event sources, are observables that can be used as event handlers in JSX templates
-  const inc$ = eventSource(() => 1)
-  const dec$ = eventSource(() => -1)
+  // "inlets" are special kind of observables that can be used to consume values produced elsewere.
+  // These ones consume events and can be passed as event handlers to the template
+  const inc$ = inlet<MouseEvent>()
+  const dec$ = inlet<MouseEvent>()
 
   const count = pipe(
-    merge(fromArray([0]), inc$, dec$),
-    scan((counter, change) => counter + change, props.init)
+    merge(
+      fromArray([0]),
+      map(1)(inc$),
+      map(-1)(dec$)
+    ),
+    scan((counter, change) => counter + change, props.init),
   )
 
+  // This function connects `count` observable with inlet `props.count$`
+  // This way observing `props.count$` actually leads to observing `count`
+  intoInlet(count, props.count$)
+
+  // Render the DOM. JSX here actually renders DOM nodes and remembers places, that need dynamic updates.
   return <>
-    Count <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>: {count}
+    <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>
   </>
 })
 
@@ -45,15 +47,15 @@ const Counter = element('x-counter', (props: { init: number }) => {
 // Root component of this example
 // Insert it as <x-app></x-app> in DOM somewhere, and it will render itself
 element('x-app', () => {
-  const mouseCoords = map(
-    fromEvent<MouseEvent>(document, 'mousemove'),
-    (event): [number, number] => [event.pageX, event.pageY]
-  )
+  const count$ = inlet<number>()
 
   return <main>
     <h1>A somewhat lacking example</h1>
-    <p>Mouse is at: <CoordsViewer coords={mouseCoords} /></p>
-    <p><Counter init={9000} /></p>
+    <p>
+      <Counter init={9000} count$={count$}/>
+
+      Current count is: {count$}
+    </p>
   </main>
 })
 ```

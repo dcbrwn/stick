@@ -1,6 +1,5 @@
-import { element, inlet } from '@stickts/stick'
-import { match } from '@stickts/stick/directives'
-import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe, broadcast } from '@stickts/stick/o'
+import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
+import { O, fromEvent, map, throttleToFrame, merge, scan, fromArray, pipe } from '@stickts/stick/o'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -40,7 +39,14 @@ const TestElement = element('x-update-perf', (props: { cols: number, rows: numbe
   return <div style="position: relative; font-family: monospace">{body}</div>
 })
 
-const Counter = element('x-counter', (props: { init: number }) => {
+const perfTest = () => {
+  return <TestElement cols={10} rows={100} />
+}
+
+const Counter = element<{
+  init: number,
+  count$: Inlet<number>
+}>('x-counter', (props) => {
   const inc$ = inlet<MouseEvent>()
   const dec$ = inlet<MouseEvent>()
 
@@ -51,35 +57,29 @@ const Counter = element('x-counter', (props: { init: number }) => {
       map(-1)(dec$)
     ),
     scan((counter, change) => counter + change, props.init),
-    broadcast
   )
 
-  const isEven = pipe(
-    count,
-    map((value) => value % 2 === 0)
-  )
+  intoInlet(count, props.count$)
 
   return <>
-    Count <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>: {count}
-    {match(isEven, (value) => {
-      if (value) {
-        return <>
-          <h1>Even</h1>
-          <p>Counter {count}</p>
-        </>
-      } else {
-        return <>
-          <h3>Odd</h3>
-        </>
-      }
-    })}
+    <button onClick={inc$}>inc</button> <button onClick={dec$}>dec</button>
   </>
 })
+
+const counterExample = () => {
+  const count$ = inlet<number>()
+
+  return <p>
+    <Counter init={9000} count$={count$}/>
+
+    Current count is: {count$}
+  </p>
+}
 
 element('x-app', () => {
   return <>
     <h1>Testbed</h1>
-    <Counter init={9000} />
-    <TestElement cols={10} rows={100} />
+    {counterExample()}
+    {perfTest()}
   </>
 })
