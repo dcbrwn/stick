@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/dcbrwn/stick/tree/dev.svg?style=svg)](https://circleci.com/gh/dcbrwn/stick/tree/dev)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/test_coverage)](https://codeclimate.com/github/dcbrwn/stick/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/maintainability)](https://codeclimate.com/github/dcbrwn/stick/maintainability)
 
 This is a POC implementation of a rendering library with following goals:
 - Simple API with as few layers of indirection as possible. One should easily be able to grasp how the thing works
@@ -65,7 +66,7 @@ element('x-app', () => {
 
 ## Caveats
 
-- `match` and `repeat` directives, render into `<s-container>` element. This gives us an ability to easily and cheaply swap rendered content and cache it. The container has `display: contents` so it's not represented in the render tree. The problem is that this interferes with flex/grid layouts and CSS selectors.
+- `match` and `repeat` directives, render into `<s-container>` element. This helps to easily and cheaply swap rendered content and cache it. The container has `display: contents` so it's not represented in the render tree. The problem is that this interferes with flex/grid layouts and CSS selectors.
 
 ## TODO
 
@@ -75,7 +76,6 @@ element('x-app', () => {
 - Shadow DOM
 - RxJS and Mostjs interop
 - docs
-- Async renderer
 - SSR
 
 ## Links
