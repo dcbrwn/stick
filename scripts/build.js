@@ -5,11 +5,11 @@
  * When it's solved, simple npm scripts can be safely used
  **/
 
-import { URL } from 'url'
-import fs from 'fs'
-import shell from 'shelljs'
+const path = require('path')
+const fs = require('fs')
+const shell = require('shelljs')
 
-const relative = (path) => new URL(path, import.meta.url)
+const relative = (part) => path.join(__dirname, part)
 
 {
   const dist = relative('../dist')

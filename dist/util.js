@@ -1,4 +1,6 @@
-export function createTag(description) {
+const createTag = (description) => {
+    // Using set to store tags, is not the most efficient solution,
+    // but it works for immutable objects and non-invasive
     const tags = new WeakSet();
     return [
         function tag(obj) {
@@ -9,8 +11,8 @@ export function createTag(description) {
             return tags.has(obj);
         }
     ];
-}
-export function tuple(description) {
+};
+const tuple = (description) => {
     const [tag, isTagged] = createTag(description);
     return [
         function create(...items) {
@@ -19,14 +21,15 @@ export function tuple(description) {
         },
         isTagged
     ];
-}
-export function toString(value) {
+};
+const toString = (value) => {
     return typeof value === 'string' ? value : value.toString();
-}
+};
 const re = /([a-z0-9])([A-Z])/g;
-export function camelToKebab(value) {
+const camelToKebab = (value) => {
     return value[0].toLowerCase() + value.slice(1).replace(re, (match, tail, head) => `${tail}-${head.toLowerCase()}`);
-}
-export const noop = (...args) => { };
-export const identity = (input) => input;
+};
+const noop = (...args) => { };
+const identity = (input) => input;
+export { createTag, tuple, toString, camelToKebab, noop, identity };
 //# sourceMappingURL=util.js.map

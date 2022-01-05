@@ -1,3 +1,4 @@
-export * from './element';
 export * as o from './o';
-export * from './eventSource';
+export { onMount, observe } from './context';
+export * from './element';
+export * from './inlet';

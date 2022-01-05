@@ -1,5 +1,4 @@
-import { tuple } from './util';
-export const stickKey = Symbol('Stick');
-export const [renderResult, isRenderResult] = tuple();
-export const Fragment = Symbol('Fragment');
+const stickKey = Symbol('Stick');
+const Fragment = Symbol('Fragment');
+export { Fragment, stickKey };
 //# sourceMappingURL=definitions.js.map

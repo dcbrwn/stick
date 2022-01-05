@@ -1,6 +1,7 @@
+import { getMount, withRenderingContext } from './context';
 import { stickKey } from './definitions';
 import { appendChild } from './dom';
-export const element = (tagName, template, options = {}) => {
+const element = (tagName, template, options = {}) => {
     var _a, _b;
     const meta = {
         tagName,
@@ -10,14 +11,15 @@ export const element = (tagName, template, options = {}) => {
             constructor() {
                 super(...arguments);
                 this[_a] = meta;
-                this.mount = false;
             }
             connectedCallback() {
                 if (!this.mount) {
-                    const [content, mount] = template(this.props);
-                    this.mount = mount || true;
-                    if (content)
-                        appendChild(this, content);
+                    withRenderingContext(() => {
+                        const content = template(this.props, this);
+                        this.mount = getMount();
+                        if (content)
+                            appendChild(this, content);
+                    });
                 }
                 if (typeof this.mount === 'function')
                     this.unmount = this.mount();
@@ -33,4 +35,5 @@ export const element = (tagName, template, options = {}) => {
         _b));
     return Object.assign(template, { [stickKey]: meta });
 };
+export { element };
 //# sourceMappingURL=element.js.map

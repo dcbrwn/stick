@@ -1,6 +1,6 @@
 import { createTag } from '../util';
-export const [tagObservable, isObservable] = createTag();
-export const observable = () => {
+const [tagObservable, isObservable] = createTag();
+const observable = () => {
     let observer;
     return [
         tagObservable((newObserver) => {
@@ -19,4 +19,5 @@ export const observable = () => {
         }
     ];
 };
+export { observable, tagObservable, isObservable };
 //# sourceMappingURL=observable.js.map

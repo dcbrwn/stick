@@ -20,6 +20,9 @@
     "EventListenerOptions": false,
     "VoidFunction": false
   },
+  "ignorePatterns": [
+    "**/dist"
+  ],
   "rules": {
     // This one is broken for cases like `new Map<T, [Element, (() => () => void) | null]>()`
     // It complains about the space after `Element,`

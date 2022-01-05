@@ -1,6 +1,8 @@
 import { O } from './observable';
-export declare type Operator<In, Out> = (input: O<In>) => O<Out>;
-export declare function throttleToFrame<T>(input: O<T>): O<T>;
-export declare const map: <T, R>(fn: (value: T) => R) => (input: O<T>) => O<R>;
-export declare const scan: <Memo, Value>(fn: (memo: Memo, value: Value) => Memo, init: Memo) => (input: O<Value>) => O<Memo>;
-export declare const filter: <T>(fn: (value: T) => boolean) => (input: O<T>) => O<T>;
+declare type Operator<In, Out> = (input: O<In>) => O<Out>;
+declare const throttleToFrame: <T>(input: O<T>) => O<T>;
+declare const map: <From, To>(fnOrValue: To | ((value: From) => To)) => (input: O<From>) => O<To>;
+declare const tap: <T>(fn: (value: T) => void) => (input: O<T>) => O<T>;
+declare const scan: <Memo, Value>(fn: (memo: Memo, value: Value) => Memo, init: Memo) => (input: O<Value>) => O<Memo>;
+declare const filter: <T>(fn: (value: T) => boolean) => (input: O<T>) => O<T>;
+export { type Operator, throttleToFrame, map, tap, scan, filter };

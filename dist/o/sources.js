@@ -1,34 +1,40 @@
 import { on } from '../dom';
+import { createTag } from '../util';
 import { tagObservable } from './observable';
-export function fromArray(items) {
+const fromArray = (items) => {
     return tagObservable((notify) => {
-        // eslint-disable-next-line prefer-const
         for (let i = 0, len = items.length; i < len; i += 1)
             notify(items[i]);
         return () => { };
     });
-}
-export function fromEvent(target, eventType, options = {}) {
+};
+const fromEvent = (target, eventType, options = {}) => {
     return tagObservable((notify) => {
         const listener = notify;
         return on(target, eventType, listener, options);
     });
-}
-export const broadcast = (input) => {
+};
+const [tagBroadcast, isBroadcast] = createTag();
+const broadcast = (input) => {
     const observers = new Set();
     let forget;
     let lastValue;
-    return tagObservable((notify) => {
+    const notifyAll = (value) => {
+        lastValue = value;
+        // Manually iterating over the observers collection on V8 9.4
+        // is roughly two times faster than using forEach with lambda
+        const iterator = observers.values();
+        let notify;
+        while (!(notify = iterator.next()).done)
+            notify.value(value);
+    };
+    return tagBroadcast(tagObservable((notify) => {
         if (observers.size === 0) {
-            forget = input((value) => {
-                lastValue = value;
-                observers.forEach((notify) => notify(value));
-            });
+            forget = input(notifyAll);
         }
         observers.add(notify);
         // TODO: `lastValue` may be intentionally undefined
         if (lastValue) {
-            console.log('greetings!');
             notify(lastValue);
         }
         return () => {
@@ -36,12 +42,13 @@ export const broadcast = (input) => {
             if (observers.size === 0)
                 forget();
         };
-    });
+    }));
 };
-export function merge(...inputs) {
+const merge = (...inputs) => {
     return tagObservable((notify) => {
         const forgetFns = inputs.map((observe) => observe(notify));
         return () => forgetFns.forEach(forget => forget());
     });
-}
+};
+export { fromArray, fromEvent, isBroadcast, broadcast, merge };
 //# sourceMappingURL=sources.js.map

@@ -1,9 +1,9 @@
 import { Renderer, Displayed, Fragment } from './definitions';
-import { EventSource } from './eventSource';
+import { Inlet } from './inlet';
 import { O } from './o';
 declare type AttrValue<T> = T | O<T>;
-declare type EventHandler<E extends Event> = ((event: E) => boolean | undefined | void) | EventSource<E>;
-export declare namespace JSX {
+declare type EventHandler<E extends Event> = ((event: E) => void) | Inlet<E>;
+declare namespace JSX {
     interface ElementProps {
         children?: (string | O<any> | Renderer)[];
     }
@@ -18,6 +18,6 @@ export declare namespace JSX {
     }
     export {};
 }
-export declare const jsx: Renderer;
-export declare const jsxs: Renderer;
-export { Fragment };
+declare const jsx: Renderer;
+declare const jsxs: Renderer;
+export { type JSX, jsx, jsxs, Fragment };

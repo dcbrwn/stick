@@ -1,4 +1,4 @@
-import { renderResult } from './definitions';
+import { onMount, getMount, withRenderingContext } from './context';
 import { createContainer } from './dom';
 import { observable } from './o';
 const ensureElement = (element) => {
@@ -7,7 +7,7 @@ const ensureElement = (element) => {
         result = createContainer();
         result.appendChild(element);
     }
-    else if (element instanceof Element) {
+    else if (element instanceof HTMLElement) {
         result = element;
     }
     else {
@@ -15,19 +15,21 @@ const ensureElement = (element) => {
     }
     return result;
 };
-export const match = (observe, renderer) => {
+const match = (observe, renderer) => {
     const cache = new Map();
     let unmount;
     let currentElement = createContainer();
-    return renderResult(currentElement, () => {
+    onMount(() => {
         const forget = observe((value) => {
             if (unmount)
                 unmount();
             let next = cache.get(value);
             if (!next) {
-                const [rootElement, mount] = renderer(value);
-                next = [ensureElement(rootElement), mount];
-                cache.set(value, next);
+                withRenderingContext(() => {
+                    const rootElement = renderer(value);
+                    next = [ensureElement(rootElement), getMount()];
+                    cache.set(value, next);
+                });
             }
             const [element, mount] = next;
             currentElement.replaceWith(element);
@@ -41,12 +43,13 @@ export const match = (observe, renderer) => {
             forget();
         };
     });
+    return currentElement;
 };
-export const repeat = (observe, renderer) => {
+const repeat = (observe, renderer) => {
     const container = createContainer();
     const items = [];
     let visibleItems = 0;
-    return renderResult(container, () => {
+    onMount(() => {
         const forget = observe((collection) => {
             var _a;
             const newLength = collection.length;
@@ -64,9 +67,11 @@ export const repeat = (observe, renderer) => {
                 const itemsToCreate = difference - cachedItems;
                 if (itemsToCreate > 0) {
                     for (let i = 0; i < itemsToCreate; i += 1) {
-                        const [observe, notify] = observable();
-                        const [element, mount] = renderer(observe);
-                        items.push({ element: ensureElement(element), notify, mount });
+                        withRenderingContext(() => {
+                            const [observe, notify] = observable();
+                            const element = renderer(observe);
+                            items.push({ element: ensureElement(element), notify, mount: getMount() });
+                        });
                     }
                 }
                 for (let i = visibleItems, len = newLength; i < len; i += 1) {
@@ -89,5 +94,7 @@ export const repeat = (observe, renderer) => {
             forget();
         };
     });
+    return container;
 };
+export { match, repeat };
 //# sourceMappingURL=directives.js.map

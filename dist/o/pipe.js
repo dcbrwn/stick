@@ -1,3 +1,5 @@
+// Typescript only allows to overload functions
+// eslint-disable-next-line func-style
 function pipe(input, ...ops) {
     const len = ops.length;
     let result = input;

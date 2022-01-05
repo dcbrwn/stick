@@ -56,7 +56,7 @@ const Counter = element<{
       map(1)(inc$),
       map(-1)(dec$)
     ),
-    scan((counter, change) => counter + change, props.init),
+    scan((counter, change) => counter + change, props.init)
   )
 
   intoInlet(count, props.count$)
