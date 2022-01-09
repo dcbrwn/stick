@@ -1,6 +1,6 @@
 import { Maybe } from '../definitions'
 import { on } from '../dom'
-import { createTag } from '../util'
+import { createTag, noop } from '../util'
 import { O, Observer, tagObservable } from './observable'
 
 const fromEvent = <E extends Event> (
@@ -15,40 +15,37 @@ const fromEvent = <E extends Event> (
   })
 }
 
+const fromArray = <T> (source: T[]): O<T> =>
+  tagObservable<O<T>>((notify: Observer<T>) => {
+    for (let i = 0, len = source.length; i < len; i += 1) notify(source[i])
+
+    return noop
+  })
+
+const fromIterator = <T> (source: Iterator<T>) =>
+  tagObservable<O<T>>((notify: Observer<T>) => {
+    let item
+    while (!(item = source.next()).done) {
+      notify(item.value)
+    }
+
+    return () => {
+      if (source.throw) source.throw(new Error('Iterator cancelled'))
+    }
+  })
+
 const from = <T> (source: T | T[] | O<T> | Iterator<T>, ...tail: T[]): O<T> => {
   if (tail.length > 0) {
-    return from([source as T, ...tail])
-  }
-
-  if (Array.isArray(source)) {
-    return tagObservable<O<T>>((notify: Observer<T>) => {
-      for (let i = 0, len = source.length; i < len; i += 1) {
-        notify(source[i])
-      }
-      return () => {}
-    })
-  }
-
-  if (typeof source === 'function') {
+    return fromArray([source as T, ...tail])
+  } else if (Array.isArray(source)) {
+    return fromArray(source)
+  } else if (typeof source === 'function') {
     return tagObservable(source as O<T>)
+  } else if (typeof (source as Iterator<T>).next === 'function') {
+    return fromIterator(source as Iterator<T>)
+  } else {
+    return fromArray([source as T])
   }
-
-  const iterator = source as Iterator<T>
-
-  if (typeof iterator.next === 'function') {
-    return tagObservable<O<T>>((notify: Observer<T>) => {
-      let item
-      while (!(item = iterator.next()).done) {
-        notify(item.value)
-      }
-
-      return () => {
-        if (iterator.throw) iterator.throw(new Error('Iterator cancelled'))
-      }
-    })
-  }
-
-  return from([source as T])
 }
 
 const [tagBroadcast, isBroadcast] = createTag<O<unknown>>()
@@ -92,8 +89,10 @@ const merge = <T extends O<unknown>[]> (...inputs: T): O<UnifyO<T>> => {
 }
 
 export {
-  from,
   fromEvent,
+  fromArray,
+  fromIterator,
+  from,
   isBroadcast,
   broadcast,
   merge
