@@ -1,12 +1,16 @@
 import { getMount, withRenderingContext } from './context'
-import { stickKey, StickOptions, Template, StickElement, AnyProps, Maybe } from './definitions'
+import { stickKey, StickOptions, Maybe, RenderResult } from './definitions'
 import { appendChild } from './dom'
 
-const element = <Props extends AnyProps> (
+type PropsOf<T> = T extends (props: infer Props, element: HTMLElement) => RenderResult
+  ? Props
+  : never
+
+const element = <T extends (props: any, element: HTMLElement) => RenderResult> (
   tagName: string,
-  template: Template<Props>,
+  template: T,
   options: StickOptions = {}
-): StickElement<Props> => {
+): T => {
   const meta = {
     tagName,
     reflect: options.reflect || {}
@@ -14,7 +18,7 @@ const element = <Props extends AnyProps> (
 
   customElements.define(tagName, class extends HTMLElement {
     public [stickKey] = meta
-    public props!: Props
+    public props!: PropsOf<T>
     public mount: Maybe<() => () => void>
     public unmount: Maybe<() => void>
 

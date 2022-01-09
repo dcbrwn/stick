@@ -6,7 +6,7 @@ import {
   AnyProps,
   Displayed,
   Fragment,
-  StickBuilder,
+  StickMeta,
   Maybe
 } from './definitions'
 import { createElement, on, setAttr, createTextNode, createFragment, appendChild } from './dom'
@@ -44,7 +44,7 @@ const bindEventHandler = (element: Element, key: string, handler: EventHandler<E
   const eventType = camelToKebab(key.slice(2))
 
   if (isInlet(handler)) {
-    intoInlet(fromEvent(element, eventType), handler)
+    intoInlet(handler, fromEvent(element, eventType))
   } else {
     onMount(() => on(element, eventType, handler as (event: Event) => void))
   }
@@ -54,7 +54,7 @@ const bindProp = (
   element: Element,
   key: string,
   value: unknown,
-  meta?: StickBuilder
+  meta?: StickMeta
 ): void => {
   const needsReflect = !meta || key in meta.reflect
 
@@ -73,11 +73,11 @@ const bindProp = (
       propValue = isBroadcast(value) ? value : broadcast(value as O<unknown>)
     }
 
+    // We don't know what element we actually dealing with here
+    // All the typechecking will happen in the template
     // @ts-expect-error
     if (!element.props) element.props = {}
     // @ts-expect-error
-    // We don't know what element we actually dealing with here
-    // All the typechecking will happen in the template
     element.props[key] = propValue
   }
 }
@@ -106,7 +106,9 @@ const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
     for (const child of c) {
       let childElement: Maybe<Node>
 
-      if (child instanceof HTMLElement) {
+      if (!child) {
+        continue
+      } else if (child instanceof HTMLElement) {
         childElement = child
       } else if (isObservable(child)) {
         const textNode = childElement = createTextNode('')

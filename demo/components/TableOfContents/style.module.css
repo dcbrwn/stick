@@ -1,3 +1,18 @@
-.tocItem {
+.tocItem ul {
+  margin: 0 4px;
+}
+
+.tocTitle {
+  display: block;
+  cursor: pointer;
+  border-radius: 4px;
+  max-width: 200px;
+  padding: 4px 8px;
   font-size: 14px;
+  color: #000D;
+}
+
+.tocTitle.selected {
+  color: #000F;
+  background-color: #0001;
 }

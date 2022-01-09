@@ -1,0 +1,17 @@
+.appRoot {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100vw;
+  height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-flow: column;
+  flex-shrink: 0;
+}
+
+.content {
+  flex-grow: 1;
+  overflow: auto;
+}

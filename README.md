@@ -39,7 +39,7 @@ const Counter = element<{
 
   // This function connects `count` observable with inlet `props.count$`
   // This way observing `props.count$` actually leads to observing `count`
-  intoInlet(count, props.count$)
+  intoInlet(props.count$, count)
 
   // Render the DOM. JSX here actually renders DOM nodes and remembers places, that need dynamic updates.
   return <>

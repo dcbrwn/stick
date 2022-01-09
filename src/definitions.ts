@@ -13,7 +13,7 @@ type StickOptions = {
     reflect?: Record<string, boolean>
 }
 
-interface StickBuilder {
+type StickMeta = {
     tagName: string;
     reflect: Record<string, boolean>
 }
@@ -24,7 +24,7 @@ type AnyProps = { [key: string]: any }
 
 type Template<Props extends AnyProps> = (props: Props, element: HTMLElement) => RenderResult
 
-type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickBuilder }
+type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickMeta }
 
 const Fragment = Symbol('Fragment')
 
@@ -37,7 +37,7 @@ export {
   type Nothing,
   type Maybe,
   type StickOptions,
-  type StickBuilder,
+  type StickMeta,
   type RenderResult,
   type AnyProps,
   type Template,
