@@ -18,17 +18,24 @@ type StickMeta = {
     reflect: Record<string, boolean>
 }
 
+interface StickElement<T = object> extends HTMLElement {
+  [stickKey]: StickMeta
+  props: T
+  connectedCallback(): void
+  disconnectedCallback(): void
+}
+
 type RenderResult = HTMLElement | DocumentFragment
 
 type AnyProps = { [key: string]: any }
 
 type Template<Props extends AnyProps> = (props: Props, element: HTMLElement) => RenderResult
 
-type StickElement<Props extends AnyProps> = Template<Props> & { [stickKey]: StickMeta }
+type StickTemplate<Props extends AnyProps> = Template<Props> & { [stickKey]: StickMeta }
 
 const Fragment = Symbol('Fragment')
 
-type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickElement<AnyProps>
+type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickTemplate<AnyProps>
 
 type Renderer = (tag: Renderable, props: AnyProps) => RenderResult
 
@@ -38,10 +45,11 @@ export {
   type Maybe,
   type StickOptions,
   type StickMeta,
+  type StickElement,
   type RenderResult,
   type AnyProps,
   type Template,
-  type StickElement,
+  type StickTemplate,
   type Renderable,
   type Renderer,
   Fragment,
