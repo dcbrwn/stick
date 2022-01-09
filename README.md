@@ -5,7 +5,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/maintainability)](https://codeclimate.com/github/dcbrwn/stick/maintainability)
 
 This is a POC implementation of a rendering library with following goals:
-- Simple API with as few layers of indirection as possible. One should easily be able to grasp how the thing works
+- Simple API with as few layers of indirection as possible. One should (relatively 😟) easily be able to grasp how the thing works
 - Fine-grained DOM updates, without intermediate layers like VirtualDOM
 - Decent perceptible performance and low memory footprint
 - Embrace the platform. Particularly WebComponents and default devtools, which already exist in browsers
@@ -67,6 +67,7 @@ element('x-app', () => {
 ## Caveats
 
 - `match` and `repeat` directives, render into `<s-container>` element. This helps to easily and cheaply swap rendered content and cache it. The container has `display: contents` so it's not represented in the render tree. The problem is that this interferes with flex/grid layouts and CSS selectors.
+- By default `observable` can be observed only once. If you need multiple observers, use `broadcast`. This is done to improve performance of piped observables. Although this might change in the future.
 
 ## TODO
 
