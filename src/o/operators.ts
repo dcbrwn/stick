@@ -3,7 +3,7 @@ import { O, tagObservable } from './observable'
 
 type Operator<In, Out> = (input: O<In>) => O<Out>
 
-const throttle = <T> (defer = requestAnimationFrame) =>
+const throttle = <T> (defer: (callback: VoidFunction) => void = requestAnimationFrame) =>
   (input: O<T>): O<T> => {
     return tagObservable((notify) => {
       let nextValue: Maybe<T>
