@@ -1,5 +1,5 @@
 import { onMount, render } from '../context'
-import { Maybe, Nothing, RenderResult } from '../definitions'
+import { Maybe, RenderResult } from '../definitions'
 import { createContainer, ensureElement } from '../dom'
 import { O } from '../o'
 
@@ -12,7 +12,7 @@ const match = <T> (
 ): RenderResult => {
   const cache = new Map<T, CacheEntry>()
   let lastValue: Maybe<T>
-  let unmount: VoidFunction | Nothing
+  let unmount: Maybe<VoidFunction>
   let currentElement: HTMLElement = createContainer()
 
   const createCacheEntry = (value: T): CacheEntry => {
