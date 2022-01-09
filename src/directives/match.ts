@@ -36,6 +36,7 @@ const match = <T> (
   onMount(() => {
     const forget = observe((value) => {
       if (!isEqual(lastValue, value)) {
+        lastValue = value
         updateContents(value)
       }
     })

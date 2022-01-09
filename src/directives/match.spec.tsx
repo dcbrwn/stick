@@ -4,7 +4,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'earljs'
 import { observable } from '../o'
 import { match } from './match'
-import { render } from '../context'
+import { onMount, render } from '../context'
 
 enum Variant {
   HELLO = 'hello',
@@ -20,8 +20,9 @@ const createTestbed = () => {
 
   const [element, ctx] = render(() => {
     return <div>{match(value$, (value) => {
-      // Record history of values passed to this item of collection
-      history.push(value)
+      onMount(() => {
+        history.push(value)
+      })
 
       switch (value) {
         case Variant.HELLO:
@@ -40,7 +41,7 @@ const createTestbed = () => {
   }
 }
 
-describe('repeat directive', () => {
+describe('match directive', () => {
   it('switches templates', () => {
     const { notify, container, mount } = createTestbed()
     mount()
@@ -64,7 +65,7 @@ describe('repeat directive', () => {
     notify(Variant.HELLO)
 
     expect(container.children[0]).toEqual(oldInstance)
-    expect(history).toEqual([Variant.HELLO, Variant.WORLD])
+    expect(history).toEqual([Variant.HELLO, Variant.WORLD, Variant.HELLO])
   })
 
   it('should not observe changes when unmounted', () => {
@@ -89,5 +90,21 @@ describe('repeat directive', () => {
 
     expect(container.innerHTML).toEqual('<p>world</p>')
     expect(history).toEqual([Variant.HELLO, Variant.WORLD])
+  })
+
+  it('should not update contents when value is not changed', () => {
+    const { notify, container, mount, history } = createTestbed()
+    mount()
+
+    notify(Variant.HELLO)
+
+    const oldInstance = container.children[0]
+    expect(container.innerHTML).toEqual('<div>hello</div>')
+
+    notify(Variant.HELLO)
+
+    expect(container.innerHTML).toEqual('<div>hello</div>')
+    expect(container.children[0]).toEqual(oldInstance)
+    expect(history).toEqual([Variant.HELLO])
   })
 })
