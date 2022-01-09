@@ -1,29 +1,31 @@
-import { onMount, getMount, withRenderingContext } from '../context'
+import { onMount, render } from '../context'
 import { Maybe, Nothing, RenderResult } from '../definitions'
 import { createContainer, ensureElement } from '../dom'
 import { O } from '../o'
 
-const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderResult => {
-  const cache = new Map<T, [HTMLElement, Maybe<() => () => void>]>()
-  const isEqual = (a: Maybe<T>, b: T): boolean => a === b
+type CacheEntry = [HTMLElement, Maybe<() => () => void>]
+
+const match = <T> (
+  observe: O<T>,
+  renderer: (value: T) => RenderResult,
+  isEqual = (a: Maybe<T>, b: T): boolean => a === b
+): RenderResult => {
+  const cache = new Map<T, CacheEntry>()
   let lastValue: Maybe<T>
   let unmount: VoidFunction | Nothing
   let currentElement: HTMLElement = createContainer()
 
-  const renderValue = (value: T) => {
+  const createCacheEntry = (value: T): CacheEntry => {
+    const [element, ctx] = render(() => renderer(value))
+    const entry: CacheEntry = [ensureElement(element), () => ctx.mount()]
+    cache.set(value, entry)
+    return entry
+  }
+
+  const updateContents = (value: T) => {
     if (unmount) unmount()
 
-    let next = cache.get(value)
-
-    if (!next) {
-      withRenderingContext(() => {
-        const rootElement = renderer(value)
-        next = [ensureElement(rootElement), getMount()]
-        cache.set(value, next)
-      })
-    }
-
-    const [element, mount] = next!
+    const [element, mount] = cache.get(value) || createCacheEntry(value)
 
     currentElement.replaceWith(element!)
     currentElement = element!
@@ -34,7 +36,7 @@ const match = <T> (observe: O<T>, renderer: (value: T) => RenderResult): RenderR
   onMount(() => {
     const forget = observe((value) => {
       if (!isEqual(lastValue, value)) {
-        renderValue(value)
+        updateContents(value)
       }
     })
 
