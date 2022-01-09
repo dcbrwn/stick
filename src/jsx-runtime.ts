@@ -111,17 +111,16 @@ const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
       } else if (child instanceof HTMLElement) {
         childElement = child
       } else if (isObservable(child)) {
-        const textNode = childElement = createTextNode('')
+        const textNode = createTextNode('')
         observe(child, (value) => {
           textNode.data = toString(value as Displayed)
         })
+        childElement = textNode
       } else {
         childElement = createTextNode(toString(child))
       }
 
-      if (childElement) {
-        appendChild(element, childElement)
-      }
+      appendChild(element, childElement)
     }
   }
 
