@@ -21,23 +21,6 @@ const createTag = <Constraint extends object = object> (description?: string): T
   ]
 }
 
-type Tuple<Constraint extends unknown[]> = [
-  create: <T extends Constraint> (...items: T) => T,
-  isInstance: (obj: unknown) => obj is Constraint
-]
-
-const tuple = <Constraint extends unknown[]> (description?: string): Tuple<Constraint> => {
-  const [tag, isTagged] = createTag<Constraint>(description)
-
-  return [
-    function create <T extends Constraint> (...items: T): T {
-      tag(items)
-      return items
-    },
-    isTagged
-  ]
-}
-
 const toString = (value: Displayed): string => {
   return typeof value === 'string' ? value : value.toString()
 }
@@ -53,7 +36,6 @@ const identity = <T>(input: T): T => input
 
 export {
   createTag,
-  tuple,
   toString,
   camelToKebab,
   noop,
