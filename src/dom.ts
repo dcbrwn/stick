@@ -1,4 +1,4 @@
-import { Displayed } from './definitions'
+import { Displayed, Maybe } from './definitions'
 import { toString } from './util'
 
 const createElement = (tagName: string) => document.createElement(tagName)
@@ -28,6 +28,21 @@ const setAttr = (target: Element, key: string, value: Displayed): void => {
 
 const appendChild = (target: Node, child: Node): Node => target.appendChild(child)
 
+const ensureElement = (element: Maybe<DocumentFragment | Element>): HTMLElement => {
+  let result: Maybe<HTMLElement>
+
+  if (element instanceof DocumentFragment) {
+    result = createContainer()
+    result.appendChild(element)
+  } else if (element instanceof HTMLElement) {
+    result = element
+  } else {
+    result = createContainer()
+  }
+
+  return result
+}
+
 if (typeof window !== 'undefined') {
   customElements.define(CONTAINER_TAG, class extends HTMLElement {})
 }
@@ -40,5 +55,6 @@ export {
   createContainer,
   on,
   setAttr,
-  appendChild
+  appendChild,
+  ensureElement
 }

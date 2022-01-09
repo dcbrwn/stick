@@ -1,12 +1,17 @@
 {
-  "extension": ["ts"],
-  "spec": "src/**/*.spec.ts",
+  "extension": ["ts", "tsx"],
+  "spec": [
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx"
+  ],
   "file": [
     "src",
     "src/o",
     "src/directives"
   ],
   "require": [
-    "ts-node/register"
+    "earljs/mocha",
+    "ts-node/register",
+    "global-jsdom/register"
   ]
 }

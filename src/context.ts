@@ -1,9 +1,10 @@
 import { O, Observer } from './o'
-import { Maybe } from './definitions'
+import { Maybe, RenderResult } from './definitions'
 import { noop } from './util'
 
 type RenderingContext = {
   mountFns: (() => Maybe<VoidFunction>)[]
+  mount: (this: RenderingContext) => () => void
 }
 
 const contextStack: RenderingContext[] = []
@@ -11,7 +12,16 @@ let currentContext: Maybe<RenderingContext>
 
 const createRenderingContext = (): RenderingContext => {
   return {
-    mountFns: []
+    mountFns: [],
+    mount () {
+      const unmountFns = this.mountFns.reduce<VoidFunction[]>((memo, mount) => {
+        const unmount = mount()
+        if (unmount) memo.push(unmount)
+        return memo
+      }, [])
+
+      return () => unmountFns.forEach((unmount) => unmount())
+    }
   }
 }
 
@@ -23,6 +33,14 @@ const withRenderingContext = (fn: VoidFunction) => {
   contextStack.pop()
   currentContext = contextStack[contextStack.length - 1]
   return ctx
+}
+
+const render = <T extends RenderResult>(template: () => T): [T, RenderingContext] => {
+  let result: Maybe<T>
+  const ctx = withRenderingContext(() => {
+    result = template()
+  })
+  return [result!, ctx]
 }
 
 const getRenderingContext = (): RenderingContext => {
@@ -41,20 +59,13 @@ const observe = <T> (observable: O<T>, observer: Observer<T> = noop): void => {
 const getMount = () => {
   const ctx = getRenderingContext()
 
-  return () => {
-    const unmountFns = ctx.mountFns.reduce<VoidFunction[]>((memo, mount) => {
-      const unmount = mount()
-      if (unmount) memo.push(unmount)
-      return memo
-    }, [])
-
-    return () => unmountFns.forEach((unmount) => unmount())
-  }
+  return () => ctx.mount()
 }
 
 export {
   type RenderingContext,
   withRenderingContext,
+  render,
   onMount,
   observe,
   getMount
