@@ -53,4 +53,16 @@ describe('element', () => {
     ])
     expect(document.body.innerHTML).toEqual(`<${tag}><span>9000</span></${tag}>`)
   })
+
+  it('renders fragments to DOM', () => {
+    const tag = createTag()
+    const template = mockFn((props: { value: number }, el: HTMLElement) => <>{props.value}</>)
+    element(tag, template)
+
+    const el = document.createElement(tag) as StickElement<{ value: number }>
+    el.props = { value: 9000 }
+    document.body.appendChild(el)
+
+    expect(document.body.innerHTML).toEqual(`<${tag}>9000</${tag}>`)
+  })
 })

@@ -23,14 +23,16 @@ namespace JSX {
     children?: (string | O<any> | Renderer)[]
   }
 
-  interface HTMLAttributes extends ElementProps {
+  type BrowserEvents = {
+    [K in keyof GlobalEventHandlersEventMap as `on${Capitalize<K>}`]?: EventHandler<GlobalEventHandlersEventMap[K]>
+  }
+
+  interface HTMLAttributes extends ElementProps, BrowserEvents{
     // TODO: Steal proper typings from preact:
     // https://github.com/preactjs/preact/blob/9d761c56bafc77be48780885391dd6f72ba23359/src/jsx.d.ts#L622
     class?: AttrValue<Displayed>
     title?: AttrValue<Displayed>
     style?: AttrValue<Displayed>
-
-    onClick?: EventHandler<MouseEvent>
   }
 
   export interface IntrinsicElements {
@@ -44,7 +46,7 @@ const bindEventHandler = (element: Element, key: string, handler: EventHandler<E
   const eventType = camelToKebab(key.slice(2))
 
   if (isInlet(handler)) {
-    intoInlet(handler, fromEvent(element, eventType))
+    onMount(() => intoInlet(handler, fromEvent(element, eventType)))
   } else {
     onMount(() => on(element, eventType, handler as (event: Event) => void))
   }
@@ -106,7 +108,7 @@ const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
     for (const child of c) {
       let childElement: Maybe<Node>
 
-      if (!child) {
+      if (!child && typeof child !== 'boolean') {
         continue
       } else if (child instanceof HTMLElement) {
         childElement = child

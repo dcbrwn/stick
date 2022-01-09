@@ -28,6 +28,10 @@ const intoInlet = <T> (inlet: Inlet<T>, input: O<T>) => {
       forget()
     }
   })
+
+  return () => {
+    if (forget) forget()
+  }
 }
 
 export {
