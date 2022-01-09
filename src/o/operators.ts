@@ -3,43 +3,27 @@ import { O, tagObservable } from './observable'
 
 type Operator<In, Out> = (input: O<In>) => O<Out>
 
-const throttleToFrame = <T> (input: O<T>): O<T> => {
-  const nextFrameTasks: VoidFunction[] = []
+const throttle = <T> (defer = requestAnimationFrame) =>
+  (input: O<T>): O<T> => {
+    return tagObservable((notify) => {
+      let nextValue: Maybe<T>
+      let isScheduled = false
 
-  const handleTasks = () => {
-    for (let i = 0, len = nextFrameTasks.length; i < len; i += 1) {
-      nextFrameTasks[i]()
-    }
-    nextFrameTasks.length = 0
-  }
-
-  const addTask = (task: VoidFunction) => {
-    if (nextFrameTasks.length === 0) {
-      requestAnimationFrame(handleTasks)
-    }
-
-    nextFrameTasks.push(task)
-  }
-
-  return tagObservable((notify) => {
-    let nextValue: T | undefined
-    let isScheduled = false
-
-    const handleNextFrame = () => {
-      isScheduled = false
-      notify(nextValue!)
-    }
-
-    return input((value) => {
-      nextValue = value
-
-      if (!isScheduled) {
-        isScheduled = true
-        addTask(handleNextFrame)
+      const handleNextFrame = () => {
+        isScheduled = false
+        notify(nextValue!)
       }
+
+      return input((value) => {
+        nextValue = value
+
+        if (!isScheduled) {
+          isScheduled = true
+          defer(handleNextFrame)
+        }
+      })
     })
-  })
-}
+  }
 
 const map = <From, To> (fnOrValue: ((value: From) => To) | To) =>
   (input: O<From>): O<To> => tagObservable((notify) => {
@@ -84,7 +68,7 @@ const rememberLast = <T> (init: Maybe<T> = undefined) => {
 
 export {
   type Operator,
-  throttleToFrame,
+  throttle,
   map,
   tap,
   scan,

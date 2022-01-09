@@ -1,7 +1,7 @@
 import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
 import { RenderResult } from '@stickts/stick/definitions'
 import { match } from '@stickts/stick/directives'
-import { O, fromEvent, map, throttleToFrame, merge, scan, from, pipe } from '@stickts/stick/o'
+import { O, fromEvent, map, throttle, merge, scan, from, pipe, broadcast } from '@stickts/stick/o'
 import { Table, TableOfContents } from '../TableOfContents'
 import styles from './style.module.css'
 
@@ -10,7 +10,11 @@ const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) =
 })
 
 const TestElement = element('x-update-perf', (props: { cols: number, rows: number }) => {
-  const mouseMove = throttleToFrame(fromEvent<MouseEvent>(document, 'mousemove'))
+  const mouseMove = pipe(
+    fromEvent<MouseEvent>(document, 'mousemove'),
+    throttle(),
+    broadcast
+  )
 
   const body = []
   for (let i = 0; i < props.rows; i += 1) {
