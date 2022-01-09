@@ -14,7 +14,7 @@ This is a POC implementation of a rendering library with following goals:
 
 ```tsx
 import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
-import { O, fromEvent, map } from '@stickts/stick/o'
+import { O, from, fromEvent, map } from '@stickts/stick/o'
 
 // element() creates a WebComponent, custom HTML tag, that can be used as a regular HTML element.
 const Counter = element<{
@@ -30,7 +30,7 @@ const Counter = element<{
 
   const count = pipe(
     merge(
-      fromArray([0]),
+      from(0),
       map(1)(inc$),
       map(-1)(dec$)
     ),
