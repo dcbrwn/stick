@@ -182,8 +182,8 @@ describe('repeat directive', () => {
     notify(['die', 'hard'])
 
     expect(history).toEqual([
-      ['hello', 'hello', 'die'],
-      ['world', 'world', 'hard']
+      ['hello', 'die'],
+      ['world', 'hard']
     ])
     expect(container.children.length).toEqual(2)
     expect(container.children[0].outerHTML).toEqual('<p>die</p>')

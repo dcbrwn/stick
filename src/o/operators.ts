@@ -1,3 +1,4 @@
+import { Maybe } from '../definitions'
 import { O, tagObservable } from './observable'
 
 type Operator<In, Out> = (input: O<In>) => O<Out>
@@ -68,11 +69,24 @@ const filter = <T> (fn: (value: T) => boolean) =>
     })
   })
 
+const rememberLast = <T> (init: Maybe<T> = undefined) => {
+  let last = init
+
+  return (input: O<T>): O<T> => tagObservable((notify) => {
+    if (last) notify(last)
+    return input((value) => {
+      last = value
+      notify(value)
+    })
+  })
+}
+
 export {
   type Operator,
   throttleToFrame,
   map,
   tap,
   scan,
-  filter
+  filter,
+  rememberLast
 }

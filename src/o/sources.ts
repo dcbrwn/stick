@@ -27,11 +27,8 @@ const [tagBroadcast, isBroadcast] = createTag<O<unknown>>()
 const broadcast = <T> (input: O<T>): O<T> => {
   const observers = new Set<Observer<T>>()
   let forget: Maybe<VoidFunction>
-  let lastValue: Maybe<T>
 
   const notifyAll = (value: T) => {
-    lastValue = value
-
     // Manually iterating over the observers collection on V8 9.4
     // is roughly two times faster than using forEach with lambda
     const iterator = observers.values()
@@ -45,11 +42,6 @@ const broadcast = <T> (input: O<T>): O<T> => {
     }
 
     observers.add(notify)
-
-    // TODO: `lastValue` may be intentionally undefined
-    if (lastValue) {
-      notify(lastValue!)
-    }
 
     return () => {
       observers.delete(notify)
