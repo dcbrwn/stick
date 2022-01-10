@@ -18,7 +18,8 @@
     "DocumentOrShadowRoot": false,
     "HTMLElementTagNameMap": false,
     "EventListenerOptions": false,
-    "VoidFunction": false
+    "VoidFunction": false,
+    "GlobalEventHandlersEventMap": false
   },
   "ignorePatterns": [
     "**/dist"
