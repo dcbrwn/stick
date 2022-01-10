@@ -3,7 +3,16 @@ const contextStack = [];
 let currentContext;
 const createRenderingContext = () => {
     return {
-        mountFns: []
+        mountFns: [],
+        mount() {
+            const unmountFns = this.mountFns.reduce((memo, mount) => {
+                const unmount = mount();
+                if (unmount)
+                    memo.push(unmount);
+                return memo;
+            }, []);
+            return () => unmountFns.forEach((unmount) => unmount());
+        }
     };
 };
 const withRenderingContext = (fn) => {
@@ -14,6 +23,13 @@ const withRenderingContext = (fn) => {
     contextStack.pop();
     currentContext = contextStack[contextStack.length - 1];
     return ctx;
+};
+const render = (template) => {
+    let result;
+    const ctx = withRenderingContext(() => {
+        result = template();
+    });
+    return [result, ctx];
 };
 const getRenderingContext = () => {
     if (!currentContext)
@@ -28,15 +44,7 @@ const observe = (observable, observer = noop) => {
 };
 const getMount = () => {
     const ctx = getRenderingContext();
-    return () => {
-        const unmountFns = ctx.mountFns.reduce((memo, mount) => {
-            const unmount = mount();
-            if (unmount)
-                memo.push(unmount);
-            return memo;
-        }, []);
-        return () => unmountFns.forEach((unmount) => unmount());
-    };
+    return () => ctx.mount();
 };
-export { withRenderingContext, onMount, observe, getMount };
+export { withRenderingContext, render, onMount, observe, getMount };
 //# sourceMappingURL=context.js.map

@@ -1,16 +1,16 @@
-import { tagObservable, observable } from './o';
+import { observable, broadcast } from './o';
 import { createTag } from './util';
 const [tagInlet, isInlet] = createTag();
 const inlet = () => {
     const [observer$, notifyObserved] = observable();
-    const inlet = (notify) => {
+    const inlet = broadcast((notify) => {
         notifyObserved(notify);
         return () => notifyObserved(null);
-    };
-    inlet.observer$ = observer$;
-    return tagObservable(tagInlet(inlet));
+    });
+    inlet.observer$ = broadcast(observer$);
+    return tagInlet(inlet);
 };
-const intoInlet = (input, inlet) => {
+const intoInlet = (inlet, input) => {
     let forget;
     inlet.observer$((notifyInlet) => {
         if (notifyInlet) {
@@ -20,6 +20,10 @@ const intoInlet = (input, inlet) => {
             forget();
         }
     });
+    return () => {
+        if (forget)
+            forget();
+    };
 };
 export { isInlet, inlet, intoInlet };
 //# sourceMappingURL=inlet.js.map

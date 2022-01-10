@@ -12,16 +12,6 @@ const createTag = (description) => {
         }
     ];
 };
-const tuple = (description) => {
-    const [tag, isTagged] = createTag(description);
-    return [
-        function create(...items) {
-            tag(items);
-            return items;
-        },
-        isTagged
-    ];
-};
 const toString = (value) => {
     return typeof value === 'string' ? value : value.toString();
 };
@@ -31,5 +21,5 @@ const camelToKebab = (value) => {
 };
 const noop = (...args) => { };
 const identity = (input) => input;
-export { createTag, tuple, toString, camelToKebab, noop, identity };
+export { createTag, toString, camelToKebab, noop, identity };
 //# sourceMappingURL=util.js.map

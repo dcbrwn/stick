@@ -1,4 +1,4 @@
-import { Displayed } from './definitions';
+import { Displayed, Maybe } from './definitions';
 declare const createElement: (tagName: string) => HTMLElement;
 declare const createTextNode: (text: string) => Text;
 declare const createComment: (comment?: string) => Comment;
@@ -7,4 +7,5 @@ declare const createContainer: () => HTMLElement;
 declare const on: (target: EventTarget, eventType: string, handler: (e: Event) => boolean | undefined | void, options?: EventListenerOptions | undefined) => () => void;
 declare const setAttr: (target: Element, key: string, value: Displayed) => void;
 declare const appendChild: (target: Node, child: Node) => Node;
-export { createElement, createTextNode, createComment, createFragment, createContainer, on, setAttr, appendChild };
+declare const ensureElement: (element: Maybe<DocumentFragment | Element>) => HTMLElement;
+export { createElement, createTextNode, createComment, createFragment, createContainer, on, setAttr, appendChild, ensureElement };

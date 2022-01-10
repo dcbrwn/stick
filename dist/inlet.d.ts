@@ -5,5 +5,5 @@ declare type Inlet<T> = O<T> & {
 };
 declare const isInlet: (obj: unknown) => obj is Inlet<unknown>;
 declare const inlet: <T>() => Inlet<T>;
-declare const intoInlet: <T>(input: O<T>, inlet: Inlet<T>) => void;
+declare const intoInlet: <T>(inlet: Inlet<T>, input: O<T>) => () => void;
 export { type Inlet, isInlet, inlet, intoInlet };

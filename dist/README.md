@@ -5,7 +5,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/maintainability)](https://codeclimate.com/github/dcbrwn/stick/maintainability)
 
 This is a POC implementation of a rendering library with following goals:
-- Simple API with as few layers of indirection as possible. One should easily be able to grasp how the thing works
+- Simple API with as few layers of indirection as possible. One should (relatively 😟) easily be able to grasp how the thing works
 - Fine-grained DOM updates, without intermediate layers like VirtualDOM
 - Decent perceptible performance and low memory footprint
 - Embrace the platform. Particularly WebComponents and default devtools, which already exist in browsers
@@ -14,7 +14,7 @@ This is a POC implementation of a rendering library with following goals:
 
 ```tsx
 import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
-import { O, fromEvent, map } from '@stickts/stick/o'
+import { O, from, fromEvent, map } from '@stickts/stick/o'
 
 // element() creates a WebComponent, custom HTML tag, that can be used as a regular HTML element.
 const Counter = element<{
@@ -30,7 +30,7 @@ const Counter = element<{
 
   const count = pipe(
     merge(
-      fromArray([0]),
+      from(0),
       map(1)(inc$),
       map(-1)(dec$)
     ),
@@ -39,7 +39,7 @@ const Counter = element<{
 
   // This function connects `count` observable with inlet `props.count$`
   // This way observing `props.count$` actually leads to observing `count`
-  intoInlet(count, props.count$)
+  intoInlet(props.count$, count)
 
   // Render the DOM. JSX here actually renders DOM nodes and remembers places, that need dynamic updates.
   return <>
@@ -67,6 +67,7 @@ element('x-app', () => {
 ## Caveats
 
 - `match` and `repeat` directives, render into `<s-container>` element. This helps to easily and cheaply swap rendered content and cache it. The container has `display: contents` so it's not represented in the render tree. The problem is that this interferes with flex/grid layouts and CSS selectors.
+- By default `observable` can be observed only once. If you need multiple observers, use `broadcast`. This is done to improve performance of piped observables. Although this might change in the future.
 
 ## TODO
 

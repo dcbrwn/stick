@@ -1,26 +1,49 @@
 import { on } from '../dom';
-import { createTag } from '../util';
+import { createTag, noop } from '../util';
 import { tagObservable } from './observable';
-const fromArray = (items) => {
-    return tagObservable((notify) => {
-        for (let i = 0, len = items.length; i < len; i += 1)
-            notify(items[i]);
-        return () => { };
-    });
-};
 const fromEvent = (target, eventType, options = {}) => {
     return tagObservable((notify) => {
         const listener = notify;
         return on(target, eventType, listener, options);
     });
 };
+const fromArray = (source) => tagObservable((notify) => {
+    for (let i = 0, len = source.length; i < len; i += 1)
+        notify(source[i]);
+    return noop;
+});
+const fromIterator = (source) => tagObservable((notify) => {
+    let item;
+    while (!(item = source.next()).done) {
+        notify(item.value);
+    }
+    return () => {
+        if (source.throw)
+            source.throw(new Error('Iterator cancelled'));
+    };
+});
+const from = (source, ...tail) => {
+    if (tail.length > 0) {
+        return fromArray([source, ...tail]);
+    }
+    else if (Array.isArray(source)) {
+        return fromArray(source);
+    }
+    else if (typeof source === 'function') {
+        return tagObservable(source);
+    }
+    else if (typeof source.next === 'function') {
+        return fromIterator(source);
+    }
+    else {
+        return fromArray([source]);
+    }
+};
 const [tagBroadcast, isBroadcast] = createTag();
 const broadcast = (input) => {
     const observers = new Set();
     let forget;
-    let lastValue;
     const notifyAll = (value) => {
-        lastValue = value;
         // Manually iterating over the observers collection on V8 9.4
         // is roughly two times faster than using forEach with lambda
         const iterator = observers.values();
@@ -29,13 +52,9 @@ const broadcast = (input) => {
             notify.value(value);
     };
     return tagBroadcast(tagObservable((notify) => {
-        if (observers.size === 0) {
-            forget = input(notifyAll);
-        }
         observers.add(notify);
-        // TODO: `lastValue` may be intentionally undefined
-        if (lastValue) {
-            notify(lastValue);
+        if (observers.size === 1) {
+            forget = input(notifyAll);
         }
         return () => {
             observers.delete(notify);
@@ -50,5 +69,5 @@ const merge = (...inputs) => {
         return () => forgetFns.forEach(forget => forget());
     });
 };
-export { fromArray, fromEvent, isBroadcast, broadcast, merge };
+export { fromEvent, fromArray, fromIterator, from, isBroadcast, broadcast, merge };
 //# sourceMappingURL=sources.js.map

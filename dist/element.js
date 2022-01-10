@@ -1,38 +1,41 @@
 import { getMount, withRenderingContext } from './context';
 import { stickKey } from './definitions';
 import { appendChild } from './dom';
+class BaseElementClass extends HTMLElement {
+    connectedCallback() {
+        if (!this.mount) {
+            withRenderingContext(() => {
+                const content = this.template(this.props, this);
+                this.mount = getMount();
+                if (content)
+                    appendChild(this, content);
+            });
+        }
+        if (typeof this.mount === 'function')
+            this.unmount = this.mount();
+    }
+    disconnectedCallback() {
+        if (this.unmount) {
+            this.unmount();
+            this.unmount = undefined;
+        }
+    }
+}
 const element = (tagName, template, options = {}) => {
-    var _a, _b;
+    var _a;
     const meta = {
         tagName,
         reflect: options.reflect || {}
     };
-    customElements.define(tagName, (_b = class extends HTMLElement {
-            constructor() {
-                super(...arguments);
-                this[_a] = meta;
-            }
-            connectedCallback() {
-                if (!this.mount) {
-                    withRenderingContext(() => {
-                        const content = template(this.props, this);
-                        this.mount = getMount();
-                        if (content)
-                            appendChild(this, content);
-                    });
-                }
-                if (typeof this.mount === 'function')
-                    this.unmount = this.mount();
-            }
-            disconnectedCallback() {
-                if (this.unmount) {
-                    this.unmount();
-                    this.unmount = undefined;
-                }
-            }
-        },
-        _a = stickKey,
-        _b));
+    class CustomElement extends BaseElementClass {
+        constructor() {
+            super(...arguments);
+            this.template = template;
+            this[_a] = meta;
+        }
+    }
+    _a = stickKey;
+    customElements.define(tagName, CustomElement);
     return Object.assign(template, { [stickKey]: meta });
 };
 export { element };

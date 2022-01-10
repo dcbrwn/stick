@@ -1,17 +1,8 @@
 {
   "name": "@stickts/stick",
-  "version": "0.1.0",
-  "source": "src/index.ts",
+  "version": "0.2.0",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "scripts": {
-    "watch": "tsc --watch",
-    "build": "node ./scripts/build.js",
-    "test": "mocha",
-    "coverage": "nyc --all --include=src/**/*.ts --exclude=**/*.spec.ts npm run test",
-    "ci:test": "mocha",
-    "ci:coverage": "nyc --all --include=src/**/*.ts --exclude=**/*.spec.ts --reporter=lcov npm run test"
-  },
   "author": "",
   "license": "ISC",
   "repository": {
@@ -32,9 +23,7 @@
     "definitions.d.ts",
     "definitions.js",
     "definitions.js.map",
-    "directives.d.ts",
-    "directives.js",
-    "directives.js.map",
+    "directives",
     "dom.d.ts",
     "dom.js",
     "dom.js.map",

@@ -1,18 +1,5 @@
 import { tagObservable } from './observable';
-const throttleToFrame = (input) => {
-    const nextFrameTasks = [];
-    const handleTasks = () => {
-        for (let i = 0, len = nextFrameTasks.length; i < len; i += 1) {
-            nextFrameTasks[i]();
-        }
-        nextFrameTasks.length = 0;
-    };
-    const addTask = (task) => {
-        if (nextFrameTasks.length === 0) {
-            requestAnimationFrame(handleTasks);
-        }
-        nextFrameTasks.push(task);
-    };
+const throttle = (defer = requestAnimationFrame) => (input) => {
     return tagObservable((notify) => {
         let nextValue;
         let isScheduled = false;
@@ -24,7 +11,7 @@ const throttleToFrame = (input) => {
             nextValue = value;
             if (!isScheduled) {
                 isScheduled = true;
-                addTask(handleNextFrame);
+                defer(handleNextFrame);
             }
         });
     });
@@ -50,5 +37,15 @@ const filter = (fn) => (input) => tagObservable((notify) => {
             notify(value);
     });
 });
-export { throttleToFrame, map, tap, scan, filter };
+const rememberLast = (init = undefined) => {
+    let last = init;
+    return (input) => tagObservable((notify) => {
+        notify(last);
+        return input((value) => {
+            last = value;
+            notify(value);
+        });
+    });
+};
+export { throttle, map, tap, scan, filter, rememberLast };
 //# sourceMappingURL=operators.js.map

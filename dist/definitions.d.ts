@@ -8,19 +8,25 @@ declare type StickOptions = {
     tagName?: string;
     reflect?: Record<string, boolean>;
 };
-interface StickBuilder {
+declare type StickMeta = {
     tagName: string;
     reflect: Record<string, boolean>;
+};
+interface StickElement<T = object> extends HTMLElement {
+    [stickKey]: StickMeta;
+    props: T;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
 }
 declare type RenderResult = HTMLElement | DocumentFragment;
 declare type AnyProps = {
     [key: string]: any;
 };
 declare type Template<Props extends AnyProps> = (props: Props, element: HTMLElement) => RenderResult;
-declare type StickElement<Props extends AnyProps> = Template<Props> & {
-    [stickKey]: StickBuilder;
+declare type StickTemplate<Props extends AnyProps> = Template<Props> & {
+    [stickKey]: StickMeta;
 };
 declare const Fragment: unique symbol;
-declare type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickElement<AnyProps>;
+declare type Renderable = typeof Fragment | (keyof HTMLElementTagNameMap) | StickTemplate<AnyProps>;
 declare type Renderer = (tag: Renderable, props: AnyProps) => RenderResult;
-export { type Displayed, type Nothing, type Maybe, type StickOptions, type StickBuilder, type RenderResult, type AnyProps, type Template, type StickElement, type Renderable, type Renderer, Fragment, stickKey };
+export { type Displayed, type Nothing, type Maybe, type StickOptions, type StickMeta, type StickElement, type RenderResult, type AnyProps, type Template, type StickTemplate, type Renderable, type Renderer, Fragment, stickKey };

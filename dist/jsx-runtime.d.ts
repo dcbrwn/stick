@@ -7,11 +7,13 @@ declare namespace JSX {
     interface ElementProps {
         children?: (string | O<any> | Renderer)[];
     }
-    interface HTMLAttributes extends ElementProps {
+    type BrowserEvents = {
+        [K in keyof GlobalEventHandlersEventMap as `on${Capitalize<K>}`]?: EventHandler<GlobalEventHandlersEventMap[K]>;
+    };
+    interface HTMLAttributes extends ElementProps, BrowserEvents {
         class?: AttrValue<Displayed>;
         title?: AttrValue<Displayed>;
         style?: AttrValue<Displayed>;
-        onClick?: EventHandler<MouseEvent>;
     }
     export interface IntrinsicElements {
         [tagName: string]: HTMLAttributes;

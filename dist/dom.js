@@ -18,9 +18,23 @@ const setAttr = (target, key, value) => {
     }
 };
 const appendChild = (target, child) => target.appendChild(child);
+const ensureElement = (element) => {
+    let result;
+    if (element instanceof DocumentFragment) {
+        result = createContainer();
+        result.appendChild(element);
+    }
+    else if (element instanceof HTMLElement) {
+        result = element;
+    }
+    else {
+        result = createContainer();
+    }
+    return result;
+};
 if (typeof window !== 'undefined') {
     customElements.define(CONTAINER_TAG, class extends HTMLElement {
     });
 }
-export { createElement, createTextNode, createComment, createFragment, createContainer, on, setAttr, appendChild };
+export { createElement, createTextNode, createComment, createFragment, createContainer, on, setAttr, appendChild, ensureElement };
 //# sourceMappingURL=dom.js.map

@@ -28,6 +28,8 @@ const relative = (part) => path.join(__dirname, part)
   parsedPack.type = 'module'
   parsedPack.files = fs.readdirSync(dist)
   delete parsedPack.devDependencies
+  delete parsedPack.scripts
+  delete parsedPack.source
 
   fs.writeFileSync(relative('../dist/package.json'), JSON.stringify(parsedPack, null, 2))
 }

@@ -8,7 +8,7 @@ const eventHandlerKey = /^on[A-Z]/;
 const bindEventHandler = (element, key, handler) => {
     const eventType = camelToKebab(key.slice(2));
     if (isInlet(handler)) {
-        intoInlet(fromEvent(element, eventType), handler);
+        onMount(() => intoInlet(handler, fromEvent(element, eventType)));
     }
     else {
         onMount(() => on(element, eventType, handler));
@@ -29,12 +29,12 @@ const bindProp = (element, key, value, meta) => {
         if (isObservable(propValue) && !isInlet(value)) {
             propValue = isBroadcast(value) ? value : broadcast(value);
         }
+        // We don't know what element we actually dealing with here
+        // All the typechecking will happen in the template
         // @ts-expect-error
         if (!element.props)
             element.props = {};
         // @ts-expect-error
-        // We don't know what element we actually dealing with here
-        // All the typechecking will happen in the template
         element.props[key] = propValue;
     }
 };
@@ -60,21 +60,23 @@ const jsx = (tag, props) => {
         const c = Array.isArray(children) ? children : [children];
         for (const child of c) {
             let childElement;
-            if (child instanceof HTMLElement) {
+            if (!child && typeof child !== 'boolean') {
+                continue;
+            }
+            else if (child instanceof HTMLElement) {
                 childElement = child;
             }
             else if (isObservable(child)) {
-                const textNode = childElement = createTextNode('');
+                const textNode = createTextNode('');
                 observe(child, (value) => {
                     textNode.data = toString(value);
                 });
+                childElement = textNode;
             }
             else {
                 childElement = createTextNode(toString(child));
             }
-            if (childElement) {
-                appendChild(element, childElement);
-            }
+            appendChild(element, childElement);
         }
     }
     return element;
