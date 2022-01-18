@@ -1,9 +1,10 @@
+import * as stick from '@stickts/stick'
 import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
 import { RenderResult } from '@stickts/stick/definitions'
 import { match } from '@stickts/stick/directives'
-import { O, fromEvent, map, throttle, merge, scan, from, pipe, broadcast } from '@stickts/stick/o'
+import { O, fromEvent, map, throttle, merge, scan, from, pipe, broadcast, tap } from '@stickts/stick/o'
 import { Table, TableOfContents } from '../TableOfContents'
-import styles from './style.module.css'
+import { css } from '@emotion/css'
 
 const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) => {
   return <span title={props.x}>({props.x}, {props.y})</span>
@@ -81,6 +82,25 @@ const counterExample = () => {
   </p>
 }
 
+
+const appRoot = css`
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100vw;
+  height: 100vh;
+`
+
+const sidebar = css`
+  display: flex;
+  flex-flow: column;
+  flex-shrink: 0;
+`
+
+const contents = css`
+  flex-grow: 1;
+  overflow: auto;
+`
+
 element('x-app', () => {
   type ExampleTOC = Table<{ renderer?: () => RenderResult }>
   const chapter$ = inlet<ExampleTOC>()
@@ -99,12 +119,19 @@ element('x-app', () => {
     ]
   })
 
-  return <div class={styles.appRoot}>
-    <div class={styles.sidebar}>
+  chapter$(console.log)
+
+  const click$ = inlet<MouseEvent>()
+
+  click$(console.log)
+  intoInlet(click$, fromEvent(document, 'mousemove'))
+
+  return <div class={appRoot}>
+    <div class={sidebar} onClick={click$}>
       <h1>Testbed</h1>
       <TableOfContents table$={toc$} selected$={chapter$} />
     </div>
-    <div class={styles.content}>
+    <div class={contents}>
       {match(chapter$, (value) => {
         return value.renderer ? value.renderer() : <span>what?</span>
       })}

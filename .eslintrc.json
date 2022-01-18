@@ -4,7 +4,8 @@
     "es2021": true
   },
   "extends": [
-    "standard"
+    "standard",
+    "plugin:react/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -30,5 +31,10 @@
     "func-call-spacing": 0,
     "func-style": [2, "expression"],
     "no-redeclare": 0
-  }
+  },
+  "settings": {
+    "react": {
+      "pragma": "stick.jsx"
+    }
+}
 }

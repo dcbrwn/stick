@@ -2,8 +2,9 @@
   "compilerOptions": {
     "target": "ESNext",
     "moduleResolution": "Node",
-    "jsx": "react-jsx",
-    "jsxImportSource": "@stickts/stick",
+    "jsx": "react",
+    "jsxFactory": "stick.jsx",
+    "jsxFragmentFactory": "stick.Fragment",
     "lib": [
       "ESNext",
       "DOM",
