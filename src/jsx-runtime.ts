@@ -19,7 +19,7 @@ type AttrValue<T> = T | O<T>
 type EventHandler<E extends Event> = ((event: E) => void) | Inlet<E>
 
 namespace JSX {
-  interface ElementProps {
+  export interface ElementProps {
     children?: (string | O<any> | Renderer)[]
   }
 
@@ -27,7 +27,7 @@ namespace JSX {
     [K in keyof GlobalEventHandlersEventMap as `on${Capitalize<K>}`]?: EventHandler<GlobalEventHandlersEventMap[K]>
   }
 
-  interface HTMLAttributes extends ElementProps, BrowserEvents{
+  interface HTMLAttributes extends ElementProps, BrowserEvents {
     // TODO: Steal proper typings from preact:
     // https://github.com/preactjs/preact/blob/9d761c56bafc77be48780885391dd6f72ba23359/src/jsx.d.ts#L622
     class?: AttrValue<Displayed>
@@ -89,9 +89,15 @@ const createElementFromTag = (tag: Renderable): DocumentFragment | HTMLElement =
   return createElement(typeof tag === 'string' ? tag : tag[stickKey].tagName)
 }
 
-const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
+const jsx: Renderer = (
+  tag: Renderable,
+  props: AnyProps,
+  ..._children: JSX.ElementProps['children'][]
+) => {
   const element = createElementFromTag(tag)
-  const { children, ...properties } = props
+  const properties = props || {}
+  const children = properties.children || _children.flat()
+  delete properties.children
 
   for (const [key, value] of Object.entries(properties)) {
     if (key.startsWith('_')) continue
@@ -108,7 +114,7 @@ const jsx: Renderer = (tag: Renderable, props: AnyProps) => {
     for (const child of c) {
       let childElement: Maybe<Node>
 
-      if (!child && typeof child !== 'boolean') {
+      if (child === null || child === undefined) {
         continue
       } else if (child instanceof HTMLElement) {
         childElement = child

@@ -1,4 +1,4 @@
-import { O, observable, Observer, broadcast } from './o'
+import { O, observable, Observer, broadcast, pipe, rememberLast } from './o'
 import { createTag } from './util'
 import { Maybe } from './definitions'
 
@@ -14,7 +14,11 @@ const inlet = <T> (): Inlet<T> => {
     notifyObserved(notify)
     return () => notifyObserved(null)
   }) as Inlet<any>
-  inlet.observer$ = broadcast(observer$)
+  inlet.observer$ = pipe(
+    observer$,
+    rememberLast(),
+    broadcast
+  )
 
   return tagInlet(inlet)
 }
