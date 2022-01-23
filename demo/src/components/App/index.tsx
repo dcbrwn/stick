@@ -2,7 +2,7 @@ import * as stick from '@stickts/stick'
 import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
 import { RenderResult } from '@stickts/stick/definitions'
 import { match } from '@stickts/stick/directives'
-import { O, fromEvent, map, throttle, merge, scan, from, pipe, broadcast, tap } from '@stickts/stick/o'
+import { O, fromEvent, map, throttle, merge, scan, from, pipe, broadcast } from '@stickts/stick/o'
 import { Table, TableOfContents } from '../TableOfContents'
 import { css } from '@emotion/css'
 
@@ -82,7 +82,6 @@ const counterExample = () => {
   </p>
 }
 
-
 const appRoot = css`
   display: flex;
   flex-flow: row nowrap;
@@ -101,7 +100,7 @@ const contents = css`
   overflow: auto;
 `
 
-element('x-app', () => {
+element('x-appz', () => {
   type ExampleTOC = Table<{ renderer?: () => RenderResult }>
   const chapter$ = inlet<ExampleTOC>()
   const toc$ = from<ExampleTOC>({
@@ -121,11 +120,6 @@ element('x-app', () => {
 
   chapter$(console.log)
 
-  const click$ = inlet<MouseEvent>()
-
-  click$(console.log)
-  intoInlet(click$, fromEvent(document, 'mousemove'))
-
   return <div class={appRoot}>
     <div class={sidebar} onClick={click$}>
       <h1>Testbed</h1>
@@ -138,3 +132,12 @@ element('x-app', () => {
     </div>
   </div>
 })
+
+console.log('inlet created')
+const click$ = inlet<MouseEvent>()
+
+console.log('inlet subscribe')
+click$((x) => console.log('move!', x))
+
+console.log('inlet connect')
+intoInlet(click$, fromEvent(document, 'mousemove'))

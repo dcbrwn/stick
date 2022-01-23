@@ -10,15 +10,11 @@ const [tagInlet, isInlet] = createTag<Inlet<unknown>>()
 
 const inlet = <T> (): Inlet<T> => {
   const [observer$, notifyObserved] = observable<Maybe<Observer<T>>>()
-  const inlet = broadcast((notify: Observer<T>): (() => void) => {
+  const inlet = ((notify: Observer<T>): (() => void) => {
     notifyObserved(notify)
     return () => notifyObserved(null)
   }) as Inlet<any>
-  inlet.observer$ = pipe(
-    observer$,
-    rememberLast(),
-    broadcast
-  )
+  inlet.observer$ = rememberLast()(observer$) as O<Maybe<Observer<T>>>
 
   return tagInlet(inlet)
 }
@@ -26,6 +22,7 @@ const inlet = <T> (): Inlet<T> => {
 const intoInlet = <T> (inlet: Inlet<T>, input: O<T>) => {
   let forget: Maybe<VoidFunction>
   inlet.observer$((notifyInlet: Maybe<Observer<T>>) => {
+    console.log('inlet notified', notifyInlet)
     if (notifyInlet) {
       forget = input((value) => notifyInlet(value))
     } else if (forget) {
