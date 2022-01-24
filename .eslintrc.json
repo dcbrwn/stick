@@ -30,11 +30,12 @@
     // It complains about the space after `Element,`
     "func-call-spacing": 0,
     "func-style": [2, "expression"],
-    "no-redeclare": 0
+    "no-redeclare": 0,
+    "react/no-unknown-property": 0
   },
   "settings": {
     "react": {
-      "pragma": "stick.jsx"
+      "pragma": "stick"
     }
-}
+  }
 }
