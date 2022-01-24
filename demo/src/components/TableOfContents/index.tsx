@@ -1,8 +1,8 @@
 import { css } from '@emotion/css'
 import * as stick from '@stickts/stick'
-import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
+import { element, Inlet, intoInlet } from '@stickts/stick'
 import { match } from '@stickts/stick/directives'
-import { O, map, pipe, rememberLast } from '@stickts/stick/o'
+import { O, map, pipe, rememberLast, observable } from '@stickts/stick/o'
 
 export type Table<ItemMeta = {}> = {
   title: string,
@@ -15,7 +15,7 @@ const tocItem = css`
   }
 `
 
-const tocTitle= css`
+const tocTitle = css`
   display: block;
   cursor: pointer;
   border-radius: 4px;
@@ -34,23 +34,13 @@ export const TableOfContents = element('x-toc', function <T> (props: {
   table$: O<Table<T>>,
   selected$?: Inlet<Table<T>>,
 }) {
-  const selected$ = inlet<Table<T>>()
+  const [selected$, setSelected] = observable<Table<T>>()
 
   if (props.selected$) {
     intoInlet(props.selected$, selected$)
   }
 
   const renderChild = (node: Table<T>) => {
-    const click$ = inlet<MouseEvent>()
-
-    intoInlet(selected$, pipe(
-      click$,
-      map((event) => {
-        event.stopPropagation()
-        return node
-      })
-    ))
-
     const titleStyle$ = pipe(
       selected$,
       rememberLast(),
@@ -61,13 +51,18 @@ export const TableOfContents = element('x-toc', function <T> (props: {
       })
     )
 
+    const handleClick = (event: MouseEvent) => {
+      event.stopPropagation()
+      setSelected(node)
+    }
+
     if (node.children) {
-      return <div class={tocItem} title={node.title} onClick={click$}>
+      return <div class={tocItem} title={node.title} onClick={handleClick}>
         <div class={titleStyle$}>{node.title}</div>
         <ul>{node.children.map(renderChild)}</ul>
       </div>
     } else {
-      return <div class={titleStyle$} title={node.title} onClick={click$}>{node.title}</div>
+      return <div class={titleStyle$} title={node.title} onClick={handleClick}>{node.title}</div>
     }
   }
 

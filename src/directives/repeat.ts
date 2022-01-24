@@ -1,7 +1,7 @@
 import { onMount, getMount, withRenderingContext } from '../context'
 import { Nothing, RenderResult } from '../definitions'
 import { createContainer, ensureElement } from '../dom'
-import { broadcast, O, observable } from '../o'
+import { O, observable } from '../o'
 
 type Item<T> = {
   notify: (item: T) => void,
@@ -22,7 +22,7 @@ const repeat = <ItemType> (
     for (let i = 0; i < itemsToCreate; i += 1) {
       withRenderingContext(() => {
         const [observe, notify] = observable<ItemType>()
-        const element = renderer(broadcast(observe), items.length)
+        const element = renderer(observe, items.length)
         items.push({ element: ensureElement(element), notify, mount: getMount() })
       })
     }

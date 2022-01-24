@@ -1,6 +1,7 @@
 import { describe, it } from 'mocha'
 import { expect, mockFn } from 'earljs'
 import { isObservable, observable } from './observable'
+import { noop } from '../util'
 
 describe('observable', () => {
   it('should tag "observe" function', () => {
@@ -21,13 +22,30 @@ describe('observable', () => {
     ])
   })
 
-  it('should fail when observed more than once', () => {
+  it('should notify multiple observers', () => {
+    const [observe, notify] = observable()
+    const observer1 = mockFn(noop)
+    const observer2 = mockFn(noop)
+
+    observe(observer1)
+    observe(observer2)
+    notify('hello world')
+
+    expect(observer1).toHaveBeenCalledExactlyWith([
+      ['hello world']
+    ])
+    expect(observer2).toHaveBeenCalledExactlyWith([
+      ['hello world']
+    ])
+  })
+
+  it('should not allow duplicate observers', () => {
     const [observe] = observable()
 
     expect(() => {
-      observe(() => {})
-      observe(() => {})
-    }).toThrow(Error, 'Already observed')
+      observe(noop)
+      observe(noop)
+    }).toThrow(Error, 'Observer already registered')
   })
 
   it('should forget observer when required', () => {
@@ -48,6 +66,6 @@ describe('observable', () => {
     expect(() => {
       forget()
       forget()
-    }).toThrow(Error, 'Already forgotten')
+    }).toThrow(Error, 'Observer already forgotten')
   })
 })

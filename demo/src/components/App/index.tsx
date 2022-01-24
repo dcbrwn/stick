@@ -2,7 +2,7 @@ import * as stick from '@stickts/stick'
 import { element, Inlet, inlet, intoInlet } from '@stickts/stick'
 import { RenderResult } from '@stickts/stick/definitions'
 import { match } from '@stickts/stick/directives'
-import { O, fromEvent, map, throttle, merge, scan, from, pipe, broadcast } from '@stickts/stick/o'
+import { O, fromEvent, map, throttle, merge, scan, from, pipe } from '@stickts/stick/o'
 import { Table, TableOfContents } from '../TableOfContents'
 import { css } from '@emotion/css'
 
@@ -13,8 +13,7 @@ const VectorView = element('x-vector', (props: { x: O<number>, y: O<number> }) =
 const TestElement = element('x-update-perf', (props: { cols: number, rows: number }) => {
   const mouseMove = pipe(
     fromEvent<MouseEvent>(document, 'mousemove'),
-    throttle(),
-    broadcast
+    throttle()
   )
 
   const body = []
@@ -100,7 +99,7 @@ const contents = css`
   overflow: auto;
 `
 
-element('x-appz', () => {
+element('x-app', () => {
   type ExampleTOC = Table<{ renderer?: () => RenderResult }>
   const chapter$ = inlet<ExampleTOC>()
   const toc$ = from<ExampleTOC>({
@@ -121,7 +120,7 @@ element('x-appz', () => {
   chapter$(console.log)
 
   return <div class={appRoot}>
-    <div class={sidebar} onClick={click$}>
+    <div class={sidebar}>
       <h1>Testbed</h1>
       <TableOfContents table$={toc$} selected$={chapter$} />
     </div>
@@ -132,12 +131,3 @@ element('x-appz', () => {
     </div>
   </div>
 })
-
-console.log('inlet created')
-const click$ = inlet<MouseEvent>()
-
-console.log('inlet subscribe')
-click$((x) => console.log('move!', x))
-
-console.log('inlet connect')
-intoInlet(click$, fromEvent(document, 'mousemove'))

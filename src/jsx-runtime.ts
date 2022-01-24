@@ -11,7 +11,7 @@ import {
 } from './definitions'
 import { createElement, on, setAttr, createTextNode, createFragment, appendChild } from './dom'
 import { Inlet, intoInlet, isInlet } from './inlet'
-import { isObservable, O, broadcast, isBroadcast, fromEvent } from './o'
+import { isObservable, O, fromEvent } from './o'
 import { camelToKebab, toString } from './util'
 
 type AttrValue<T> = T | O<T>
@@ -69,18 +69,12 @@ const bindProp = (
   }
 
   if (meta) {
-    let propValue = value
-
-    if (isObservable(propValue) && !isInlet(value)) {
-      propValue = isBroadcast(value) ? value : broadcast(value as O<unknown>)
-    }
-
     // We don't know what element we actually dealing with here
     // All the typechecking will happen in the template
     // @ts-expect-error
     if (!element.props) element.props = {}
     // @ts-expect-error
-    element.props[key] = propValue
+    element.props[key] = value
   }
 }
 

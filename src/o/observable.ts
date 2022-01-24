@@ -7,22 +7,44 @@ type O<T> = (observer: Observer<T>) => (() => void)
 const [tagObservable, isObservable] = createTag<O<unknown>>()
 
 const observable = <T> (): [O<T>, (value: T) => void] => {
-  let observer: Observer<T> | undefined
+  const observers = new Set<Observer<T>>()
+  const notifyAll = (value: T) => {
+    for (const notify of observers) {
+      notify(value)
+    }
+  }
+  let notify: Observer<T> | undefined
 
   return [
     tagObservable((newObserver: Observer<T>): (() => void) => {
-      if (observer) throw new Error('Already observed')
+      if (observers.has(newObserver)) {
+        throw new Error('Observer already registered')
+      }
 
-      observer = newObserver
+      observers.add(newObserver)
+
+      if (observers.size === 1) {
+        notify = newObserver
+      } else if (observers.size > 1) {
+        notify = notifyAll
+      }
 
       return () => {
-        if (!observer) throw new Error('Already forgotten')
+        if (!observers.has(newObserver)) {
+          throw new Error('Observer already forgotten')
+        }
 
-        observer = undefined
+        observers.delete(newObserver)
+
+        if (observers.size === 1) {
+          notify = [...observers].pop()
+        } else if (observers.size === 0) {
+          notify = undefined
+        }
       }
     }),
     (value: T) => {
-      if (observer) observer(value)
+      if (notify) notify(value)
     }
   ]
 }
