@@ -1,6 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect, mockFn } from 'earljs'
-import { broadcast, observable } from '.'
+import { observable } from '.'
 import { throttle, map, tap, scan, filter, rememberLast } from './operators'
 import { Maybe } from '../definitions'
 import { noop } from '../util'
@@ -248,7 +248,7 @@ describe('rememberLast', () => {
 
   it('notifies new observers with stored value', () => {
     const [value$, notify] = observable<string>()
-    const op$ = rememberLast('init')(broadcast(value$))
+    const op$ = rememberLast('init')(value$)
     const observer = mockFn().returns(undefined)
 
     op$(noop)

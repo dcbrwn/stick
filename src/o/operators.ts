@@ -60,7 +60,6 @@ const rememberLast = <T> (init: Maybe<T> = undefined) => {
     notify(last)
 
     return input((value) => {
-      console.log('heyyy', last)
       last = value
       notify(value)
     })

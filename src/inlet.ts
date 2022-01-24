@@ -1,4 +1,4 @@
-import { O, observable, Observer, broadcast, pipe, rememberLast } from './o'
+import { O, observable, Observer, tagObservable } from './o'
 import { createTag } from './util'
 import { Maybe } from './definitions'
 
@@ -10,19 +10,19 @@ const [tagInlet, isInlet] = createTag<Inlet<unknown>>()
 
 const inlet = <T> (): Inlet<T> => {
   const [observer$, notifyObserved] = observable<Maybe<Observer<T>>>()
-  const inlet = ((notify: Observer<T>): (() => void) => {
+  const inlet = tagObservable((notify: Observer<T>): (() => void) => {
     notifyObserved(notify)
     return () => notifyObserved(null)
   }) as Inlet<any>
-  inlet.observer$ = rememberLast()(observer$) as O<Maybe<Observer<T>>>
+  inlet.observer$ = observer$
 
   return tagInlet(inlet)
 }
 
 const intoInlet = <T> (inlet: Inlet<T>, input: O<T>) => {
   let forget: Maybe<VoidFunction>
+
   inlet.observer$((notifyInlet: Maybe<Observer<T>>) => {
-    console.log('inlet notified', notifyInlet)
     if (notifyInlet) {
       forget = input((value) => notifyInlet(value))
     } else if (forget) {
