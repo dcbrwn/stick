@@ -60,8 +60,8 @@ const Counter = element('x-counter', (props: {
   intoInlet(props.count$, pipe(
     merge(
       from(0),
-      map(1)(inc$),
-      map(-1)(dec$)
+      pipe(inc$, map(1)),
+      pipe(dec$, map(-1))
     ),
     scan((counter, change) => counter + change, props.init)
   ))

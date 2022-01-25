@@ -1,70 +1,57 @@
 import { Maybe } from '../definitions'
-import { O, tagObservable } from './observable'
+import { Observer } from './observable'
 
-type Operator<In, Out> = (input: O<In>) => O<Out>
+type Operator<In, Out> = (next: Observer<Out>) => Observer<In>
 
 const throttle = <T> (defer: (callback: VoidFunction) => void = requestAnimationFrame) =>
-  (input: O<T>): O<T> => {
-    return tagObservable((notify) => {
-      let nextValue: Maybe<T>
-      let isScheduled = false
+  (next: Observer<T>) => {
+    let nextValue: Maybe<T>
+    let isScheduled = false
 
-      const handleNextFrame = () => {
-        isScheduled = false
-        notify(nextValue!)
+    const handleNextFrame = () => {
+      isScheduled = false
+      next(nextValue!)
+    }
+
+    return (value: T) => {
+      nextValue = value
+
+      if (!isScheduled) {
+        isScheduled = true
+        defer(handleNextFrame)
       }
-
-      return input((value) => {
-        nextValue = value
-
-        if (!isScheduled) {
-          isScheduled = true
-          defer(handleNextFrame)
-        }
-      })
-    })
+    }
   }
 
 const map = <From, To> (fnOrValue: ((value: From) => To) | To) =>
-  (input: O<From>): O<To> => tagObservable((notify) => {
-    return typeof fnOrValue === 'function'
-      ? input((value) => notify((fnOrValue as (value: From) => To)(value)))
-      : input(() => notify(fnOrValue))
-  })
+  (next: Observer<To>) => {
+    const mapFn = typeof fnOrValue === 'function'
+      ? fnOrValue as (value: From) => To
+      : (_: From): To => fnOrValue
+
+    return (value: From) => next(mapFn(value))
+  }
 
 const tap = <T> (fn: (value: T) => void) =>
-  (input: O<T>): O<T> => tagObservable((notify) => {
-    return input((value) => {
-      fn(value)
-      notify(value)
-    })
-  })
+  (next: Observer<T>) => (value: T) => {
+    fn(value)
+    next(value)
+  }
 
 const scan = <Memo, Value> (fn: (memo: Memo, value: Value) => Memo, init: Memo) =>
-  (input: O<Value>): O<Memo> => tagObservable((notify) => {
+  (next: Observer<Memo>) => {
     let memo = init
-    return input((value) => notify(memo = fn(memo, value)))
-  })
+
+    return (value: Value) => {
+      memo = fn(memo, value)
+      next(memo)
+    }
+  }
 
 const filter = <T> (fn: (value: T) => boolean) =>
-  (input: O<T>): O<T> => tagObservable((notify) => {
-    return input((value) => {
-      if (fn(value)) notify(value)
-    })
-  })
-
-const rememberLast = <T> (init: Maybe<T> = undefined) => {
-  let last = init
-
-  return (input: O<T>): O<Maybe<T>> => tagObservable((notify) => {
-    notify(last)
-
-    return input((value) => {
-      last = value
-      notify(value)
-    })
-  })
-}
+  (next: Observer<T>) => (value: T) => {
+    if (fn(value)) next(value)
+  }
 
 export {
   type Operator,
@@ -72,6 +59,5 @@ export {
   map,
   tap,
   scan,
-  filter,
-  rememberLast
+  filter
 }

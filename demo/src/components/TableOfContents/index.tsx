@@ -2,7 +2,7 @@ import { css } from '@emotion/css'
 import * as stick from '@stickts/stick'
 import { element, Inlet, intoInlet } from '@stickts/stick'
 import { match } from '@stickts/stick/directives'
-import { O, map, pipe, rememberLast, observable } from '@stickts/stick/o'
+import { O, map, pipe, observable } from '@stickts/stick/o'
 
 export type Table<ItemMeta = {}> = {
   title: string,
@@ -43,7 +43,6 @@ export const TableOfContents = element('x-toc', function <T> (props: {
   const renderChild = (node: Table<T>) => {
     const titleStyle$ = pipe(
       selected$,
-      rememberLast(),
       map((selected) => {
         return selected === node
           ? `${tocTitle} selected`

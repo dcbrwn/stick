@@ -26,13 +26,11 @@ const intoInlet = <T> (inlet: Inlet<T>, input: O<T>) => {
     if (notifyInlet) {
       forget = input((value) => notifyInlet(value))
     } else if (forget) {
-      forget()
+      return forget()
     }
   })
 
-  return () => {
-    if (forget) forget()
-  }
+  return () => forget ? forget() : undefined
 }
 
 export {

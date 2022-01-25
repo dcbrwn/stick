@@ -1,3 +1,5 @@
+import { observable, tagObservable } from '.'
+import { Maybe } from '../definitions'
 import { O } from './observable'
 import { Operator } from './operators'
 
@@ -39,14 +41,25 @@ function pipe<In, A, B, C, D, Out>(
 // Typescript only allows to overload functions
 // eslint-disable-next-line func-style
 function pipe (input: O<any>, ...ops: Operator<any, any>[]): O<unknown> {
-  const len = ops.length
-  let result = input
+  const [observe, notify] = observable()
+  const next = ops.reduceRight((memo, op) => op(memo), notify)
+  let forgetInput: Maybe<VoidFunction>
 
-  for (let i = 0; i < len; i += 1) {
-    result = ops[i](result)
-  }
+  return tagObservable((notify) => {
+    const forget = observe(notify)
 
-  return result
+    if (!forgetInput) {
+      forgetInput = input(next)
+    }
+
+    return () => {
+      if (forget()) {
+        forgetInput!()
+        forgetInput = undefined
+        return true
+      }
+    }
+  })
 }
 
 export { pipe }

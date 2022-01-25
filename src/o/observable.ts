@@ -1,8 +1,9 @@
+import { Maybe } from '../definitions'
 import { createTag } from '../util'
 
 type Observer<T> = (value: T) => void
 
-type O<T> = (observer: Observer<T>) => (() => void)
+type O<T> = (observer: Observer<T>) => (() => Maybe<true>)
 
 const [tagObservable, isObservable] = createTag<O<unknown>>()
 
@@ -16,7 +17,7 @@ const observable = <T> (): [O<T>, (value: T) => void] => {
   let notify: Observer<T> | undefined
 
   return [
-    tagObservable((newObserver: Observer<T>): (() => void) => {
+    tagObservable((newObserver: Observer<T>): (() => Maybe<true>) => {
       if (observers.has(newObserver)) {
         throw new Error('Observer already registered')
       }
@@ -41,6 +42,8 @@ const observable = <T> (): [O<T>, (value: T) => void] => {
         } else if (observers.size === 0) {
           notify = undefined
         }
+
+        return observers.size === 0 ? true : undefined
       }
     }),
     (value: T) => {
