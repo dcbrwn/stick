@@ -1,5 +1,6 @@
 # Stick
 
+![Size](https://img.shields.io/bundlephobia/minzip/@stickts/stick)
 [![CircleCI](https://circleci.com/gh/dcbrwn/stick/tree/dev.svg?style=svg)](https://circleci.com/gh/dcbrwn/stick/tree/dev)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/test_coverage)](https://codeclimate.com/github/dcbrwn/stick/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d56309aed4f0a8657ed5/maintainability)](https://codeclimate.com/github/dcbrwn/stick/maintainability)
