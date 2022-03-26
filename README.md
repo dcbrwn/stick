@@ -68,17 +68,6 @@ element('x-app', () => {
 ## Caveats
 
 - `match` and `repeat` directives, render into `<s-container>` element. This helps to easily and cheaply swap rendered content and cache it. The container has `display: contents` so it's not represented in the render tree. The problem is that this interferes with flex/grid layouts and CSS selectors.
-- By default `observable` can be observed only once. If you need multiple observers, use `broadcast`. This is done to improve performance of piped observables. Although this might change in the future.
-
-## TODO
-
-- Refine API
-- Cover the API with tests
-- Proper styling support
-- Shadow DOM
-- RxJS and Mostjs interop
-- docs
-- SSR
 
 ## Links
 
